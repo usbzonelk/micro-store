@@ -1,0 +1,39 @@
+# .NET
+## Ignore the bin and obj directories
+bin/
+obj/
+
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+
+# Visual Studio files
+.vscode/
+.vs/
+*.code-workspace
+*.todo
+# NuGet packages
+*.nuget.props
+*.paket.props
+paket-files/
+packages/
+*.nupkg
+debug/
+release/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+Views/Shared/LoginPartial.html
