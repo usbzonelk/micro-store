@@ -7,12 +7,12 @@ namespace ProductService.Controllers;
 
 [Route("api/products")]
 [ApiController]
-public class ProductController : ControllerBase
+public class ProductsController : ControllerBase
 {
-    private readonly ILogger<ProductController> _logger;
+    private readonly ILogger<ProductsController> _logger;
     private readonly ProductServiceDBContext _context;
 
-    public ProductController(ILogger<ProductController> logger, ProductServiceDBContext context)
+    public ProductsController(ILogger<ProductsController> logger, ProductServiceDBContext context)
     {
         _logger = logger;
         _context = context;
@@ -22,7 +22,8 @@ public class ProductController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
     {
-        return await _context.Products.ToListAsync<Product>();
+       // return await _context.Products.ToListAsync<Product>();
+       return new List<Product>(){};
     }
 
 }

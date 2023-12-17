@@ -9,37 +9,43 @@ namespace ProductService.Models
 
     public class Product
     {
+        [Key]
+        public int ProductID { get; set; }
+
         [Required(ErrorMessage = "Please enter the slug.")]
-        public string Slug;
+        public string Slug { get; set; }
 
         [Required(ErrorMessage = "Please enter the type.")]
-        public string? ProduductType;
+        public ProductType? ProductType { get; set; }
 
         [Required(ErrorMessage = "Please enter the price.")]
-        public float Price;
+        public float Price { get; set; }
 
         [Required(ErrorMessage = "Please enter the title.")]
-        public string Title;
+        public string Title { get; set; }
 
         [Required]
-        public bool Availability = true;
+        public bool Availability { get; set; }
 
         [Required]
-        public int InStock;
+        public int InStock { get; set; }
 
         [Required]
-        public string Description;
+        public string Description { get; set; }
 
         [Required]
-        public int WarraentyMonths;
+        public int WarrantyMonths { get; set; }
 
     }
     [Index(nameof(TypeName), IsUnique = true)]
 
     public class ProductType
     {
+        [Key]
+        public int ProductTypeID { get; set; }
+
         [Required(ErrorMessage = "Please enter the product type.")]
-        public string TypeName;
+        public string TypeName { get; set; }
 
 
 
