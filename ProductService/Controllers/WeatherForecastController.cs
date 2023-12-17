@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+/* using Microsoft.AspNetCore.Mvc;
 
 namespace UserService.Controllers;
 
@@ -19,7 +19,7 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    public IEnumerable<> Get()
     {
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         {
@@ -30,3 +30,4 @@ public class WeatherForecastController : ControllerBase
         .ToArray();
     }
 }
+ */
