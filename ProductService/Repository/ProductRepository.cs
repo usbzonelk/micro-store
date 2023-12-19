@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using ProductService.Controllers;
@@ -9,33 +10,35 @@ namespace ProductService.Repository;
 public class ProductRepository : IProductRepository
 {
     private readonly ProductServiceDBContext _db;
+    internal DbSet<Product> dbSet;
 
     public ProductRepository(ProductServiceDBContext db)
     {
         _db = db;
+        this.dbSet = _db.Set<Product>();
     }
-    public void Add(Product entity)
+    public void Add(Product product)
     {
-        throw new NotImplementedException();
+        this.dbSet.Add(product);
     }
 
     public Product Get(Expression<Func<Product, bool>> find)
     {
-        throw new NotImplementedException();
+        return dbSet.Where(find).FirstOrDefault();
     }
 
     public IEnumerable<Product> GetAll()
     {
-        throw new NotImplementedException();
+        return dbSet.ToList();
     }
 
-    public IEnumerable<Product> GetMany(Expression<Func<IEnumerable<Product>, bool>> find)
+    public IEnumerable<Product> GetMany(Expression<Func<Product, bool>> find)
     {
-        throw new NotImplementedException();
+        return dbSet.Where(find).ToList();
     }
 
-    public void Remove(Product entity)
+    public void Remove(Product product)
     {
-        throw new NotImplementedException();
+        dbSet.Remove(product);
     }
 }
