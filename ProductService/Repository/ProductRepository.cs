@@ -15,6 +15,7 @@ public class ProductRepository : IProductRepository
     public ProductRepository(ProductServiceDBContext db)
     {
         _db = db;
+        dbSet = _db.Set<Product>();
     }
     public void Add(Product product)
     {
