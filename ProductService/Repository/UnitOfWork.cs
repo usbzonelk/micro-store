@@ -13,7 +13,10 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(ProductServiceDBContext db)
     {
         _db = db;
-        ProductRepository = new ProductRepository();
+        ProductRepository = new ProductRepository(_db);
     }
-
+    public void Save()
+    {
+        _db.SaveChanges();
+    }
 }
