@@ -7,4 +7,5 @@ namespace ProductService.Repository;
 public interface IUnitOfWork
 {
     IProductRepository ProductRepository { get; set; }
+    IProductTypesRepository ProductTypesRepository { get; set; }
 }
