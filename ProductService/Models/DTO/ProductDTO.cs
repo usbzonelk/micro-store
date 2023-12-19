@@ -8,7 +8,7 @@ namespace ProductService.Models.DTO
         public string Slug { get; set; }
 
         [Required]
-        public ProductType ProductType { get; set; }
+        public string ProductTypeName { get; set; }
 
         [Required]
         public float Price { get; set; }
