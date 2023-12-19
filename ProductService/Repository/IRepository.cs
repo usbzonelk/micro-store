@@ -8,12 +8,8 @@ public interface IRepository<T> where T : class
 {
     IEnumerable<T> GetAll();
     T Get(Expression<Func<T, bool>> find);
-
     IEnumerable<T> GetMany(Expression<Func<IEnumerable<T>, bool>> find);
     void Add(T entity);
-
     void Remove(T entity);
-
-
 }
 
