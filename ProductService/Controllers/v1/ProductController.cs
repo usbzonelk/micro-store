@@ -24,9 +24,9 @@ namespace ProductService.Controllers.v1
         }
 
         [HttpGet(Name = "GetProducts")]
-        public IEnumerable<Product> GetProducts()
+        public async IEnumerable<Product> GetProducts()
         {
-            return _unitOfWork.ProductRepository.GetAll();
+            return await _unitOfWork.ProductRepository.GetAll();
         }
 
         [HttpGet("{id:int}", Name = "GetProduct")]
