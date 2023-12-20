@@ -46,4 +46,9 @@ public class Repository<T> : IRepository<T> where T : class
         await Save();
     }
 
+    public async Task<IEnumerable<T>> Search(string serachQuery, string searchProperty)
+    {
+        return await dbSet.Where(b => EF.Property<string>(b, searchProperty).Contains(serachQuery)).ToListAsync();
+
+    }
 }

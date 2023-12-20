@@ -11,6 +11,8 @@ public interface IRepository<T> where T : class
     Task<IEnumerable<T>> GetMany(Expression<Func<T, bool>> find);
     Task Add(T entity);
     Task Remove(T entity);
+    Task<IEnumerable<T>> Search(string serachQuery, string searchProperty);
+
     Task Save();
 }
 
