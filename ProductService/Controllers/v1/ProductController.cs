@@ -48,14 +48,43 @@ namespace ProductService.Controllers.v1
                 _response.Successful = false;
                 _response.Errors
                      = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
             }
             return _response;
         }
 
-        [HttpGet("{id:int}", Name = "GetProduct")]
-        public void GetProduct(int id)
+        [HttpGet("{slug}", Name = "GetProduct")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetProduct(string slug)
         {
-            //  return _unitOfWork.ProductRepository.Get(product => product.ProductID == id);
+
+            Product chosenProduct;
+            try
+            {
+                chosenProduct = await _unitOfWork.ProductRepository.Get(product => product.Slug == slug);
+                _response.Result = _mapper.Map<ProductDTO>(chosenProduct);
+                if (chosenProduct == null)
+                {
+                    _response.Status = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+                else
+                {
+                    _response.Status = HttpStatusCode.OK;
+                    return Ok(_response);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
         }
 
     }
