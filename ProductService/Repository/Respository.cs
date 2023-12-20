@@ -14,30 +14,36 @@ public class Repository<T> : IRepository<T> where T : class
         _db = db;
         dbSet = _db.Set<T>();
     }
-    public void Add(T entity)
+    public async Task Save()
     {
-        this.dbSet.Add(entity);
+        await _db.SaveChangesAsync();
+
+    }
+    public async Task Add(T entity)
+    {
+        await dbSet.AddAsync(entity);
+        await Save();
     }
 
-
-    public T Get(Expression<Func<T, bool>> find)
+    public async Task<T> Get(Expression<Func<T, bool>> find)
     {
-        return dbSet.Where(find).FirstOrDefault();
+        return await dbSet.Where(find).FirstOrDefaultAsync();
     }
 
-    public IEnumerable<T> GetAll()
+    public async Task<IEnumerable<T>> GetAll()
     {
-        return dbSet.ToList();
+        return await dbSet.ToListAsync();
     }
 
-    public IEnumerable<T> GetMany(Expression<Func<T, bool>> find)
+    public async Task<IEnumerable<T>> GetMany(Expression<Func<T, bool>> find)
     {
-        return dbSet.Where(find).ToList();
+        return await dbSet.Where(find).ToListAsync();
     }
 
-    public void Remove(T entity)
+    public async Task Remove(T entity)
     {
-        throw new NotImplementedException();
+        dbSet.Remove(entity);
+        await Save();
     }
 
 }

@@ -6,10 +6,11 @@ namespace ProductService.Repository;
 
 public interface IRepository<T> where T : class
 {
-    IEnumerable<T> GetAll();
-    T Get(Expression<Func<T, bool>> find);
-    IEnumerable<T> GetMany(Expression<Func<T, bool>> find);
-    void Add(T entity);
-    void Remove(T entity);
+    Task<IEnumerable<T>> GetAll();
+    Task<T> Get(Expression<Func<T, bool>> find);
+    Task<IEnumerable<T>> GetMany(Expression<Func<T, bool>> find);
+    Task Add(T entity);
+    Task Remove(T entity);
+    Task Save();
 }
 
