@@ -15,18 +15,34 @@ namespace ProductService.Controllers.v1
     {
         private readonly ILogger<ProductsController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        protected APIResponse _response;
 
         public ProductsController(ILogger<ProductsController> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-
+            _response = new();
         }
 
         [HttpGet(Name = "GetProducts")]
-        public async IEnumerable<Product> GetProducts()
+        public async Task<ActionResult<APIResponse>> GetProducts()
         {
-            return await _unitOfWork.ProductRepository.GetAll();
+            IEnumerable<Product> allProducts;
+            try
+            {
+                allProducts = await _unitOfWork.ProductRepository.GetAll();
+                _response.Result = allProducts;
+                _response.Status = HttpStatusCode.OK;
+                return Ok(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
         }
 
         [HttpGet("{id:int}", Name = "GetProduct")]
