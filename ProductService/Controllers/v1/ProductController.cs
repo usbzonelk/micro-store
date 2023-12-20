@@ -57,6 +57,7 @@ namespace ProductService.Controllers.v1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<APIResponse>> GetProduct(string slug)
         {
 
@@ -86,6 +87,41 @@ namespace ProductService.Controllers.v1
             }
             return _response;
         }
+
+        [HttpGet("search", Name = "SearchProducts")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> SearchProducts([FromQuery] string query)
+        {
+            IEnumerable<Product> foundProducts;
+            try
+            {
+                foundProducts = await _unitOfWork.ProductRepository.Search(query, "Title");
+                if (foundProducts != null)
+                {
+                    _response.Result = _mapper.Map<List<ProductDTO>>(foundProducts);
+                    _response.Status = HttpStatusCode.OK;
+                    return Ok(_response);
+                }
+                else
+                {
+                    _response.Status = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+
 
     }
 }
