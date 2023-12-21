@@ -13,6 +13,7 @@ namespace ProductService
 
             //ReverseMap for bidirection
             CreateMap<ProductDTO, Product>();
+            CreateMap<ProductUpdateDTO, Product>();
 
             CreateMap<ProductInputDTO, Product>();
 

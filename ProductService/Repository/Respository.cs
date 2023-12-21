@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using ProductService.Data;
+using ProductService.Models;
 
 namespace ProductService.Repository;
 
@@ -44,6 +45,12 @@ public class Repository<T> : IRepository<T> where T : class
     {
         dbSet.Remove(entity);
         await Save();
+    }
+    public async Task<T> Update(T entity)
+    {
+        dbSet.Update(entity);
+        await Save();
+        return entity;
     }
 
     public async Task<IEnumerable<T>> Search(string serachQuery, string searchProperty)

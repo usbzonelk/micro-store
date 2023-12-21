@@ -205,5 +205,33 @@ namespace ProductService.Controllers.v1
             }
             return _response;
         }
+
+        [HttpPut("update/{slug}", Name = "Update")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<APIResponse>> UpdateProduct(string slug, [FromBody] ProductUpdateDTO productUpdate)
+        {
+            try
+            {
+                if (productUpdate == null || slug != productUpdate.Slug)
+                {
+                    return BadRequest();
+                }
+
+                Product model = _mapper.Map<Product>(productUpdate);
+                var updatedProduct = await _unitOfWork.ProductRepository.Update(model);
+                _response.Status = HttpStatusCode.NoContent;
+                _response.Successful = true;
+                _response.Result = updatedProduct;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
     }
 }
