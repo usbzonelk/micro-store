@@ -17,6 +17,7 @@ namespace ProductService
             CreateMap<ProductInputDTO, Product>();
 
             CreateMap<ProductTypeDTO, ProductType>().ReverseMap();
+            CreateMap<ProductTypeInputDTO, ProductType>().ReverseMap();
 
             CreateMap<ProductType, Product>()
            .ForMember(dest => dest.ProductType, opt => opt.MapFrom(src => new ProductType { ProductTypeID = src.ProductTypeID, TypeName = src.TypeName }));
