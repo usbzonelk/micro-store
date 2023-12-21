@@ -293,6 +293,41 @@ namespace ProductService.Controllers.v1
             return NoContent();
         }
 
+        [HttpGet("type/{typeName}", Name = "GetProductsOfType")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetProductsOfType(string typeName)
+        {
+
+            ProductType chosenType;
+            try
+            {
+                chosenType = await _unitOfWork.ProductTypesRepository.Get(ProductType => ProductType.TypeName == typeName, tracked: false);
+                if (chosenType == null)
+                {
+                    throw new Exception("Entered product type doesn't exist");
+                }
+                else
+                {
+                    var productList = await _unitOfWork.ProductRepository.GetMany(product => product.ProductType == chosenType);
+                    _response.Result = _mapper.Map<List<Product>>(productList);
+                    _response.Status = HttpStatusCode.OK;
+                    return Ok(_response);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+
     }
 
 }
