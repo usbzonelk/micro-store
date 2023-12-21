@@ -172,6 +172,38 @@ namespace ProductService.Controllers.v1
             return _response;
         }
 
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpDelete("delete/{slug}", Name = "DeleteProduct")]
+        public async Task<ActionResult<APIResponse>> DeleteProduct(string slug)
+        {
+            try
+            {
+                if (slug == null || slug == "")
+                {
+                    return BadRequest();
+                }
+                var productToBeDeleted = await _unitOfWork.ProductRepository.Get(product => product.Slug == slug);
+                if (productToBeDeleted == null)
+                {
+                    return NotFound();
+                }
 
+                await _unitOfWork.ProductRepository.Remove(productToBeDeleted);
+                _response.Status = HttpStatusCode.NoContent;
+                _response.Successful = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
     }
 }
