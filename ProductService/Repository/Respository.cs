@@ -58,4 +58,13 @@ public class Repository<T> : IRepository<T> where T : class
         return await dbSet.Where(b => EF.Property<string>(b, searchProperty).Contains(serachQuery)).ToListAsync();
 
     }
+    public void Detach(T entity)
+    {
+        var entry = dbSet.Entry(entity);
+
+        if (entry.State != EntityState.Detached)
+        {
+            entry.State = EntityState.Detached;
+        }
+    }
 }

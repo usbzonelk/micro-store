@@ -13,6 +13,7 @@ public interface IRepository<T> where T : class
     Task Remove(T entity);
     Task<T> Update(T entity);
     Task<IEnumerable<T>> Search(string serachQuery, string searchProperty);
+    public void Detach(T entity);
 
     Task Save();
 }

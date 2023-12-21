@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using ProductService.Data;
 using ProductService.Models;
@@ -213,12 +214,37 @@ namespace ProductService.Controllers.v1
         {
             try
             {
-                if (productUpdate == null || slug != productUpdate.Slug)
+                if (productUpdate == null || slug == "")
                 {
                     return BadRequest();
                 }
+                Product productToBeChanged = await _unitOfWork.ProductRepository.Get(product => product.Slug == slug);
 
+                if (productToBeChanged == null)
+                {
+                    _response.Status = HttpStatusCode.NotFound;
+                    _response.Successful = false;
+                    _response.Errors = new List<string> { "The slug you've entered is incorrect" };
+                    return NotFound(_response);
+                }
+                else
+                {
+                    _unitOfWork.ProductRepository.Detach(productToBeChanged);
+                }
+                ProductType productTypeInput = await _unitOfWork.ProductTypesRepository.Get(productType => productType.ProductTypeID == productUpdate.ProductTypeID);
+
+                if (productTypeInput == null)
+                {
+                    _response.Status = HttpStatusCode.NotFound;
+                    _response.Successful = false;
+                    _response.Errors = new List<string> { "The ProductTypeID you entred doesn't exist" };
+                    return NotFound(_response);
+
+                }
                 Product model = _mapper.Map<Product>(productUpdate);
+                model.ProductType = productTypeInput;
+                model.ProductID = productToBeChanged.ProductID;
+
                 var updatedProduct = await _unitOfWork.ProductRepository.Update(model);
                 _response.Status = HttpStatusCode.NoContent;
                 _response.Successful = true;
@@ -233,5 +259,8 @@ namespace ProductService.Controllers.v1
             }
             return _response;
         }
+
+
     }
+
 }
