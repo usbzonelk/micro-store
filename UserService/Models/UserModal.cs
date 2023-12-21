@@ -2,8 +2,10 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 namespace UserService.Models
 {
+    [Index(nameof(Email), IsUnique = true)]
     public class User
     {
         public User()
@@ -12,10 +14,6 @@ namespace UserService.Models
         }
         [Key]
         public int UserId { get; set; }
-
-        [Required(ErrorMessage = "Username is required.")]
-        [StringLength(50, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 50 characters.")]
-        public string Username { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email address.")]
@@ -33,7 +31,7 @@ namespace UserService.Models
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
-        
+
         public string PhoneNumber { get; set; }
 
         // Address information
