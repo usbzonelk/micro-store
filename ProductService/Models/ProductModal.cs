@@ -16,7 +16,7 @@ namespace ProductService.Models
         public string Slug { get; set; }
 
         [Required(ErrorMessage = "Please enter the type.")]
-        public ProductType? ProductType { get; set; }
+        public ProductType ProductType { get; set; }
 
         [Required(ErrorMessage = "Please enter the price.")]
         public float Price { get; set; }

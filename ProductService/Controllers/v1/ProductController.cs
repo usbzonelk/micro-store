@@ -34,11 +34,11 @@ namespace ProductService.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetProducts()
         {
-            IEnumerable<Product> allProducts;
+            IEnumerable<Product> allProducts = null;
             try
             {
                 allProducts = await _unitOfWork.ProductRepository.GetAll();
-                _response.Result = _mapper.Map<List<ProductDTO>>(allProducts);
+                _response.Result = _mapper.Map<List<Product>>(allProducts);
                 _response.Status = HttpStatusCode.OK;
                 return Ok(_response);
 
@@ -50,6 +50,7 @@ namespace ProductService.Controllers.v1
                      = new List<string>() { ex.ToString() };
                 _response.Status = HttpStatusCode.InternalServerError;
             }
+
             return _response;
         }
 
@@ -108,6 +109,55 @@ namespace ProductService.Controllers.v1
                 {
                     _response.Status = HttpStatusCode.NotFound;
                     return NotFound(_response);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+
+        [HttpPost("create", Name = "CreateProduct")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> CreateProduct([FromBody] ProductInputDTO newProductDTO)
+        {
+
+            try
+            {
+                if (newProductDTO == null)
+                {
+                    throw new Exception(message: "The data you entered is incorrect!");
+                }
+
+                var slugExists = await _unitOfWork.ProductRepository.Get(product => product.Slug == newProductDTO.Slug);
+                if (slugExists != null)
+                {
+                    throw new Exception(message: "The slug you entred already exists");
+                }
+                else
+                {
+                    ProductType productTypeInput = await _unitOfWork.ProductTypesRepository.Get(productType => productType.ProductTypeID == newProductDTO.ProductTypeID);
+
+                    if (productTypeInput == null)
+                    {
+                        throw new Exception(message: "The ProductTypeID you entred doesn't exist");
+
+                    }
+
+                    Product newProduct = _mapper.Map<Product>(newProductDTO);
+                    newProduct.ProductType = productTypeInput;
+                    await _unitOfWork.ProductRepository.Add(newProduct);
+                    _response.Result = _mapper.Map<ProductDTO>(newProduct);
+                    _response.Status = HttpStatusCode.Created;
+                    return CreatedAtRoute("GetProduct", new { slug = newProduct.Slug }, _response);
                 }
 
 
