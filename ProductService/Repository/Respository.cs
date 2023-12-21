@@ -1,3 +1,4 @@
+using System.Diagnostics.Eventing.Reader;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using ProductService.Data;
@@ -26,8 +27,12 @@ public class Repository<T> : IRepository<T> where T : class
         await Save();
     }
 
-    public async Task<T> Get(Expression<Func<T, bool>> find)
+    public async Task<T> Get(Expression<Func<T, bool>> find, bool tracked = true)
     {
+        if (!tracked)
+        {
+            return await dbSet.AsNoTracking<T>().Where(find).FirstOrDefaultAsync();
+        }
         return await dbSet.Where(find).FirstOrDefaultAsync();
     }
 

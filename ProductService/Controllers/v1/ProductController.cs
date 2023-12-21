@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -260,6 +261,37 @@ namespace ProductService.Controllers.v1
             return _response;
         }
 
+        [HttpPatch("updatePartially/{slug}", Name = "UpdatePartialProduct")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdatePartialProduct(string slug, JsonPatchDocument<ProductDTO> productUpdate)
+        {
+            if (productUpdate == null || slug == null)
+            {
+                return BadRequest();
+            }
+            var product = await _unitOfWork.ProductRepository.Get(product => product.Slug == slug, tracked: false);
+
+            ProductDTO proudctDTO = _mapper.Map<ProductDTO>(product);
+
+            if (product == null)
+            {
+                _response.Status = HttpStatusCode.NotFound;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "The slug you've entered is incorrect" };
+                return NotFound(_response);
+            }
+            productUpdate.ApplyTo(proudctDTO);
+            Product model = _mapper.Map<Product>(proudctDTO);
+
+            await _unitOfWork.ProductRepository.Update(model);
+
+            /* if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            } */
+            return NoContent();
+        }
 
     }
 
