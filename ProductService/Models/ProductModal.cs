@@ -12,7 +12,7 @@ namespace ProductService.Models
         [Key]
         public int ProductID { get; set; }
 
-        [Required(ErrorMessage = "Please enter the slug.")]
+        [RegularExpression(@"^[a-z0-9]+(?:-[a-z0-9]+)*$", ErrorMessage = "Invalid slug")]
         public string Slug { get; set; }
 
         [Required(ErrorMessage = "Please enter the type.")]
