@@ -339,6 +339,57 @@ namespace UserService.Controllers.v1
                 return Ok(_response);
 
             }
+
+
+        }
+
+        [HttpPost("authorize", Name = "AuthUser")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> AuthUser([FromBody] UserLoginDTO userLogins)
+        {
+
+            try
+            {
+                if (userLogins == null)
+                {
+                    throw new Exception(message: "The data you entered is incorrect!");
+                }
+
+                var userExists = await _unitOfWork.UserRepository.Get(user => user.Email == userLogins.Email);
+                if (userExists == null)
+                {
+                    throw new Exception(message: "The email you entred is not registered");
+                }
+                else
+                {
+                    bool passVerify = HashText.VerifyPass(userLogins.Password, userExists.Password);
+                    if (!passVerify)
+                    {
+                        _response.Result = "Incorrect password!";
+                        _response.Status = HttpStatusCode.Forbidden;
+                        return BadRequest(_response);
+                    }
+                    else
+                    {
+                        _response.Result = "User authenticated successfully!";
+                        _response.Status = HttpStatusCode.OK;
+                        return Ok(_response);
+
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
         }
     }
 }
