@@ -10,6 +10,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UserService.Utils;
 
+using System.Text.Json;
+
 namespace UserService.Controllers.v1
 {
     [Route("api/v1/users")]

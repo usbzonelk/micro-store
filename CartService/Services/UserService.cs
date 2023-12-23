@@ -19,6 +19,7 @@ namespace Mango.Services.ShoppingCartAPI.Service
             var response = await client.GetAsync($"/api/v1/users/{email}");
             var apiContet = await response.Content.ReadAsStringAsync();
             var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+            Console.WriteLine($"\n\n{resp.ToString()}\n\n");
             if (resp.Successful)
             {
                 return JsonConvert.DeserializeObject<UserDTO>(Convert.ToString(resp.Result));
