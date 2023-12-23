@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using CartService;
 using CartService.Data;
 using CartService.Repository;
+using CartService.Service.IService;
+using Mango.Services.ShoppingCartAPI.Service;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CartServiceDBContext>(dbOptions => dbOptions.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUserService, UsersService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddAutoMapper(typeof(Mappings));
 
 builder.Services.AddHttpClient("Product", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]));

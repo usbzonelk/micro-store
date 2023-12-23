@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using CartService.Models;
 using CartService.Models.DTO;
 using CartService.Repository;
+using CartService.Service.IService;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -20,13 +21,16 @@ namespace UserService.Controllers.v1
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         protected APIResponse _response;
-
-        public CartsController(ILogger<CartsController> logger, IUnitOfWork unitOfWork, IMapper mapper)
+        private IProductService _productService;
+        private IUserService _userService;
+        public CartsController(ILogger<CartsController> logger, IUnitOfWork unitOfWork, IMapper mapper, IProductService productService, IUserService userService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _response = new();
+            _productService = productService;
+            _userService = userService;
         }
 
         [HttpGet("{email}", Name = "GetFullCart")]
@@ -36,11 +40,20 @@ namespace UserService.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<APIResponse>> GetFullCart(string email)
         {
-
             IEnumerable<Cart> chosenCartItems;
             try
             {
-                int userID = 0; // todo: verify UiD
+                if (email == null)
+                {
+                    throw new Exception("Email is invalid!");
+                }
+                var userFound = await _userService.GetUserID(email);
+
+                if (userFound == null || userFound.IsActive == false)
+                {
+                    throw new Exception("Email is invalid or account is inactive!");
+                }
+                int userID = userFound.UserId;
                 chosenCartItems = await _unitOfWork.CartRepository.GetMany(cartItem => cartItem.UserId == userID);
                 _response.Result = _mapper.Map<List<UserCartItemDTO>>(chosenCartItems);
                 if (chosenCartItems == null)

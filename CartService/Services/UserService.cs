@@ -5,11 +5,11 @@ using Newtonsoft.Json;
 
 namespace Mango.Services.ShoppingCartAPI.Service
 {
-    public class UserService : IUserService
+    public class UsersService : IUserService
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public UserService(IHttpClientFactory clientFactory)
+        public UsersService(IHttpClientFactory clientFactory)
         {
             _httpClientFactory = clientFactory;
         }
