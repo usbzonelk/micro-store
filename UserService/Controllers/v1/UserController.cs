@@ -8,6 +8,7 @@ using UserService.Repository;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UserService.Utils;
 
 namespace UserService.Controllers.v1
 {
@@ -146,6 +147,8 @@ namespace UserService.Controllers.v1
                 else
                 {
                     User newUser = _mapper.Map<User>(newUserDTO);
+                    newUser.Password = HashText.HashPass(newUserDTO.Password);
+
                     await _unitOfWork.UserRepository.Add(newUser);
                     _response.Result = _mapper.Map<UserDTO>(newUser);
                     _response.Status = HttpStatusCode.Created;
@@ -281,6 +284,59 @@ namespace UserService.Controllers.v1
                 _response.Successful = false;
                 _response.Errors = new List<string> { "The verification token you've entered is incorrect" };
                 return NotFound(_response);
+
+            }
+        }
+        [HttpPatch("updatepassword/", Name = "UpdateUserPassword")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateUserPassword([FromBody] PasswordUpdateDTO updateInfo)
+        {
+            if (updateInfo == null || updateInfo.Email == null || updateInfo.Password == null || updateInfo.OldPassword == null)
+            {
+                return BadRequest();
+            }
+            var user = await _unitOfWork.UserRepository.Get(u => u.Email == updateInfo.Email, tracked: false);
+
+            if (updateInfo.Password == updateInfo.OldPassword)
+            {
+                _response.Status = HttpStatusCode.NotFound;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "Passwords can't be the same" };
+                return NotFound(_response);
+            }
+
+            if (user == null)
+            {
+                _response.Status = HttpStatusCode.NotFound;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "The email you've entered is incorrect" };
+                return NotFound(_response);
+            }
+            if (user.IsActive == false)
+            {
+                _response.Status = HttpStatusCode.Forbidden;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "The account is not active!" };
+                return NotFound(_response);
+            }
+            else
+            {
+                bool isOldPassCorrect = HashText.VerifyPass(updateInfo.OldPassword, user.Password);
+                if (!isOldPassCorrect)
+                {
+                    _response.Status = HttpStatusCode.Forbidden;
+                    _response.Successful = false;
+                    _response.Result = new List<string> { "The old password is incorrect!" };
+                    return NotFound(_response);
+                }
+                user.Password = HashText.HashPass(updateInfo.Password);
+                var result = await _unitOfWork.UserRepository.Update(user);
+
+                _response.Status = HttpStatusCode.OK;
+                _response.Successful = true;
+                _response.Result = $"You've successfully updated password for: {updateInfo.Email}";
+                return Ok(_response);
 
             }
         }
