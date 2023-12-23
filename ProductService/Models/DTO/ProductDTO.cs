@@ -5,6 +5,7 @@ namespace ProductService.Models.DTO
 {
     public class ProductDTO
     {
+        public int ProductID { get; set; }
         public string Slug { get; set; }
 
         [Required]

@@ -6,6 +6,7 @@ namespace UserService.Models.DTO
 
     public class UserDTO
     {
+        public int UserId { get; set; }
         public string Email { get; set; }
         public bool IsVerified { get; set; }
         public string FirstName { get; set; }
