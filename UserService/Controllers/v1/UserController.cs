@@ -7,6 +7,7 @@ using UserService.Models.DTO;
 using UserService.Repository;
 using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace UserService.Controllers.v1
 {
@@ -237,75 +238,51 @@ namespace UserService.Controllers.v1
             }
             return _response;
         }
-        /*
-                [HttpPatch("updatePartially/{slug}", Name = "UpdatePartialUser")]
-                [ProducesResponseType(StatusCodes.Status204NoContent)]
-                [ProducesResponseType(StatusCodes.Status400BadRequest)]
-                public async Task<IActionResult> UpdatePartialUser(string slug, JsonPatchDocument<UserDTO> productUpdate)
-                {
-                    if (productUpdate == null || slug == null)
-                    {
-                        return BadRequest();
-                    }
-                    var product = await _unitOfWork.UserRepository.Get(product => product.Slug == slug, tracked: false);
 
-                    UserDTO proudctDTO = _mapper.Map<UserDTO>(product);
+        [HttpPatch("verify/{email}", Name = "VerifyUser")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> VerifyUser(string email, [FromQuery] string userToken)
+        {
+            if (userToken == null || email == null)
+            {
+                return BadRequest();
+            }
+            var user = await _unitOfWork.UserRepository.Get(u => u.Email == email, tracked: false);
 
-                    if (product == null)
-                    {
-                        _response.Status = HttpStatusCode.NotFound;
-                        _response.Successful = false;
-                        _response.Errors = new List<string> { "The slug you've entered is incorrect" };
-                        return NotFound(_response);
-                    }
-                    productUpdate.ApplyTo(proudctDTO);
-                    User model = _mapper.Map<User>(proudctDTO);
+            if (user == null)
+            {
+                _response.Status = HttpStatusCode.NotFound;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "The email you've entered is incorrect" };
+                return NotFound(_response);
+            }
+            if (user.IsVerified == false && user.VerificationToken == userToken)
+            {
+                user.IsVerified = true;
+                user.IsActive = true;
+                var result = await _unitOfWork.UserRepository.Update(user);
 
-                    await _unitOfWork.UserRepository.Update(model);
+                _response.Status = HttpStatusCode.OK;
+                _response.Successful = true;
+                _response.Result = $"You've successfully varified your account: {email}";
+                return Ok(_response);
+            }
+            else if (user.IsVerified == true && user.VerificationToken == userToken)
+            {
+                _response.Status = HttpStatusCode.Forbidden;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "The account is already verified!" };
+                return NotFound(_response);
+            }
+            else
+            {
+                _response.Status = HttpStatusCode.Forbidden;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "The verification token you've entered is incorrect" };
+                return NotFound(_response);
 
-                    // if (!ModelState.IsValid)
-                    //  {
-                    //       return BadRequest(ModelState);
-                    //  } 
-                    //   return NoContent();
-                }
-                /*
-                            [HttpGet("type/{typeName}", Name = "GetUsersOfType")]
-                            [ProducesResponseType(StatusCodes.Status403Forbidden)]
-                            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-                            [ProducesResponseType(StatusCodes.Status200OK)]
-                            [ProducesResponseType(StatusCodes.Status404NotFound)]
-                            public async Task<ActionResult<APIResponse>> GetUsersOfType(string typeName)
-                            {
-
-                                UserType chosenType;
-                                try
-                                {
-                                    chosenType = await _unitOfWork.UserTypesRepository.Get(UserType => UserType.TypeName == typeName, tracked: false);
-                                    if (chosenType == null)
-                                    {
-                                        throw new Exception("Entered product type doesn't exist");
-                                    }
-                                    else
-                                    {
-                                        var productList = await _unitOfWork.UserRepository.GetMany(product => product.UserType == chosenType);
-                                        _response.Result = _mapper.Map<List<User>>(productList);
-                                        _response.Status = HttpStatusCode.OK;
-                                        return Ok(_response);
-                                    }
-
-                                }
-                                catch (Exception ex)
-                                {
-                                    _response.Successful = false;
-                                    _response.Errors
-                                         = new List<string>() { ex.ToString() };
-                                    _response.Status = HttpStatusCode.InternalServerError;
-                                }
-                                return _response;
-                            }
-                                */
-
+            }
+        }
     }
-
 }
