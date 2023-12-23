@@ -12,6 +12,7 @@ namespace UserService
             CreateMap<UserCreateDTO, User>().ReverseMap();
             CreateMap<PasswordUpdateDTO, User>().ReverseMap();
             CreateMap<UserUpdateDTO, User>().ReverseMap();
+            CreateMap<UserAddDetailsDTO, User>().ReverseMap();
         }
     }
 

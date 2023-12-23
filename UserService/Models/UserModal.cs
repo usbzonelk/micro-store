@@ -25,24 +25,25 @@ namespace UserService.Models
 
         public string VerificationToken { get; set; }
 
-        public bool IsVerified { get; set; }
+        public bool IsVerified { get; set; } = false;
+        public bool IsActive { get; set; } = false;
 
         // Additional user information
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
 
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         // Address information
-        public string StreetAddress { get; set; }
+        public string? StreetAddress { get; set; }
 
-        public string City { get; set; }
+        public string? City { get; set; }
 
-        public string Province { get; set; }
+        public string? Province { get; set; }
 
         [DataType(DataType.PostalCode)]
-        public string ZipCode { get; set; }
+        public string? ZipCode { get; set; }
 
         private void GenerateVerificationToken()
         {

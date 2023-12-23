@@ -20,8 +20,7 @@ namespace UserService.Migrations
                 {
                     UserId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "longtext", nullable: false),
+                    Email = table.Column<string>(type: "varchar(255)", nullable: false),
                     Password = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     VerificationToken = table.Column<string>(type: "longtext", nullable: false),
                     IsVerified = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -38,6 +37,12 @@ namespace UserService.Migrations
                     table.PrimaryKey("PK_User", x => x.UserId);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_Email",
+                table: "User",
+                column: "Email",
+                unique: true);
         }
 
         /// <inheritdoc />
