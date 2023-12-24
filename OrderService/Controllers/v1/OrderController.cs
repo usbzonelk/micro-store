@@ -113,6 +113,64 @@ namespace OrderService.Controllers.v1
             return _response;
         }
 
+        [HttpGet("/getAllOrders/{email}", Name = "GetOrders")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<ActionResult<APIResponse>> GetOrders(string email)
+        {
+            IEnumerable<Order> allOrders = null;
+            try
+            {
+                if (email == null)
+                {
+                    throw new Exception("Email is invalid!");
+                }
+                var userFound = await _userService.GetUserID(email);
+
+                if (userFound == null || userFound.IsActive == false)
+                {
+                    throw new Exception("Email is invalid or account is inactive!");
+                }
+                int userID = userFound.UserId;
+
+                allOrders = await _unitOfWork.OrderRepository.GetMany(order => order.UserId == userFound.UserId);
+
+                if (allOrders.Count() < 1)
+                {
+                    _response.Result = "No  orders found!";
+                    _response.Status = HttpStatusCode.NoContent;
+                    return NoContent();
+                }
+
+                List<OrderOutputDTO> orderOutput = new List<OrderOutputDTO>();
+                foreach (var order in allOrders)
+                {
+                    var orderItemsForOrder = await _unitOfWork.OrderItemRepository.GetMany(orderItem => orderItem.ParentOrder == order);
+                    var outputOrderItems = _mapper.Map<List<OrderItemDTO>>(orderItemsForOrder);
+
+                    var singleOrderOutput = new OrderOutputDTO { OrderDate = order.OrderDate, OrderId = order.OrderId, OrderItems = outputOrderItems };
+                    orderOutput.Add(singleOrderOutput);
+                }
+
+                _response.Result = orderOutput;
+                _response.Status = HttpStatusCode.OK;
+                return Ok(_response);
+
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+
+            return _response;
+        }
 
     }
 }
