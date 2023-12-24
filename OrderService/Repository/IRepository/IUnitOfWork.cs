@@ -7,4 +7,5 @@ namespace OrderService.Repository;
 public interface IUnitOfWork
 {
     IOrderRepository OrderRepository { set; get; }
+    IOrderItemRepository OrderItemRepository{ set; get; }
 }

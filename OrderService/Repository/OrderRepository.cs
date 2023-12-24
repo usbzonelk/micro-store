@@ -7,10 +7,10 @@ using OrderService.Repository;
 
 namespace OrderService.Repository;
 
-public class CartRepository : Repository<Order>, IOrderRepository
+public class OrderRepository : Repository<Order>, IOrderRepository
 {
     private OrderServiceDBContext _db;
-    public CartRepository(OrderServiceDBContext db) : base(db)
+    public OrderRepository(OrderServiceDBContext db) : base(db)
     {
         _db = db;
     }

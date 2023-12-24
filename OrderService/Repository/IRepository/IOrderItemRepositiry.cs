@@ -4,7 +4,7 @@ using OrderService.Models;
 
 namespace OrderService.Repository;
 
-public interface IOrderItemRepositiry : IRepository<OrderItem>
+public interface IOrderItemRepository : IRepository<OrderItem>
 {
-    Task RemoveMany(Expression<Func<Order, bool>> filter);
+    Task RemoveMany(Expression<Func<OrderItem, bool>> filter);
 }

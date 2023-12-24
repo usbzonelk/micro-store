@@ -37,11 +37,11 @@ namespace OrderService.Controllers.v1
             _cartService = cartService;
 
         }
-        [HttpGet("/allorders/{email}", Name = "GetAllOrders")]
+        [HttpPost("/createorder/{email}", Name = "CreateOrder")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> GetAllOrders(string email)
+        public async Task<ActionResult<APIResponse>> CreateOrder(string email)
         {
             IEnumerable<Order> allOrders = null;
             try
@@ -58,11 +58,47 @@ namespace OrderService.Controllers.v1
                 }
                 int userID = userFound.UserId;
 
-                allOrders = await _unitOfWork.OrderRepository.GetMany(order => order.UserId == userID);
-                
-                _response.Result = _mapper.Map<List<Order>>(allOrders);
+                var cartItems = await _cartService.GetCartByEmail(email);
+                var allProducts = await _productService.GetProducts();
+
+                if (cartItems.Count() < 1)
+                {
+                    _response.Result = "Cart is empty";
+                    _response.Status = HttpStatusCode.NoContent;
+                    return Ok(_response);
+                }
+                var newOrder = new OrderDTO { UserId = userID, OrderDate = DateTime.Now };
+                var orderToSave = _mapper.Map<Order>(newOrder);
+                await _unitOfWork.OrderRepository.Add(orderToSave);
+
+                List<OrderItemDTO> orderItems = new List<OrderItemDTO>();
+                foreach (var cartProduct in cartItems)
+                {
+                    var chosenProduct = allProducts.Where(prod => prod.ProductId == cartProduct.ProductId).FirstOrDefault();
+                    if (chosenProduct == null)
+                    {
+                        throw new Exception("The entred priduct ID is invalid");
+                    }
+                    else
+                    {
+                        var newOrderItem = new OrderItemDTO { Total = (float)chosenProduct.Price * (float)cartProduct.Quantity, ProductId = chosenProduct.ProductId, Quantity = cartProduct.Quantity };
+                        orderItems.Add(newOrderItem);
+
+                        var orderItemToSave = _mapper.Map<OrderItem>(newOrderItem);
+                        orderItemToSave.ParentOrder = orderToSave;
+                        await _unitOfWork.OrderItemRepository.Add(orderItemToSave);
+
+                    }
+                }
+                var cartDeletion = await _cartService.DeleteCart(email);
+                if (cartDeletion == null)
+                {
+                    throw new Exception("Cart wasn't deleted successfully!");
+                }
+                _response.Result = allOrders;
                 _response.Status = HttpStatusCode.OK;
                 return Ok(_response);
+
 
             }
             catch (Exception ex)
@@ -70,6 +106,7 @@ namespace OrderService.Controllers.v1
                 _response.Successful = false;
                 _response.Errors
                      = new List<string>() { ex.ToString() };
+
                 _response.Status = HttpStatusCode.InternalServerError;
             }
 

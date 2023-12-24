@@ -10,6 +10,7 @@ namespace OrderService.Models.DTO
         public int InStock { get; set; }
         public bool Availability { get; set; }
         public string Slug { get; set; }
+        public float Price { get; set; }
 
     }
 }

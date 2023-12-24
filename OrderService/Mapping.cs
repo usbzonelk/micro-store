@@ -9,6 +9,7 @@ namespace OrderService
         public Mapping()
         {
             CreateMap<OrderItemDTO, OrderItem>().ReverseMap();
+            CreateMap<OrderDTO, Order>().ReverseMap();
         }
     }
 
