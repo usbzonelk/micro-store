@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OrderService;
-using OrderService.Models;
+using OrderService.Repository;
 using OrderService.Data;
 using OrderService.Service.IService;
 
@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddDbContext<OrderServiceDBContext>(dbOptions => dbOptions.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
 
