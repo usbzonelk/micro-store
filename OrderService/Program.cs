@@ -17,6 +17,7 @@ builder.Services.AddDbContext<OrderServiceDBContext>(dbOptions => dbOptions.UseM
 builder.Services.AddScoped<IUserService, UsersService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddAutoMapper(typeof(Mapping));
 
 builder.Services.AddHttpClient("Product", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]));
 builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:UserAPI"]));
