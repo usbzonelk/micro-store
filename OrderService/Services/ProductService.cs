@@ -3,7 +3,7 @@ using OrderService.Models.DTO;
 using OrderService.Service.IService;
 using Newtonsoft.Json;
 
-namespace OrderService.Service
+namespace OrderService.Service.IService
 {
     public class ProductService : IProductService
     {

@@ -4,7 +4,7 @@ using OrderService.Service.IService;
 using Newtonsoft.Json;
 using System.Collections;
 
-namespace OrderService.Service
+namespace OrderService.Service.IService
 {
     public class CartService : ICartService
     {
