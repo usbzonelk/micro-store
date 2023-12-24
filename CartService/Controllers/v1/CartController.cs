@@ -133,7 +133,8 @@ namespace UserService.Controllers.v1
                             var cartItem = await _unitOfWork.CartRepository.Get(item => item.UserId == cartInput.UserId && item.ProductId == cartInput.ProductId);
                             if (cartItem != null)
                             {
-                                cartInput.Quantity += cartItem.Quantity;
+                                saveCart.Quantity += cartItem.Quantity;
+                                saveCart.CartItemId = cartItem.CartItemId;
                                 await _unitOfWork.CartRepository.Update(saveCart);
                             }
                             else
@@ -210,6 +211,7 @@ namespace UserService.Controllers.v1
                         };
 
                         Cart saveCart = _mapper.Map<Cart>(cartInput);
+                        saveCart.CartItemId = cartAvailability.CartItemId;
 
                         await _unitOfWork.CartRepository.Update(saveCart);
 
