@@ -80,10 +80,7 @@ namespace UserService.Controllers.v1
             return _response;
         }
 
-
-
-
-        [HttpPost("create/{email}", Name = "addToCart")]
+        [HttpPost("addtocart/{email}", Name = "addToCart")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -133,11 +130,10 @@ namespace UserService.Controllers.v1
 
                             Cart saveCart = _mapper.Map<Cart>(cartInput);
 
-                            int currentCartQty = 0;
-                            var cartItems = _unitOfWork.CartRepository.Get(item => item.UserId == cartInput.UserId && item.ProductId == cartInput.ProductId);
-                            if (cartItems != null)
+                            var cartItem = await _unitOfWork.CartRepository.Get(item => item.UserId == cartInput.UserId && item.ProductId == cartInput.ProductId);
+                            if (cartItem != null)
                             {
-                              //  cartInput.Quantity += cartItems
+                                cartInput.Quantity += cartItem.Quantity;
                                 await _unitOfWork.CartRepository.Update(saveCart);
                             }
                             else
@@ -162,84 +158,119 @@ namespace UserService.Controllers.v1
             return _response;
         }
 
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpDelete("removefromcart/{email}", Name = "RemoveFromCart")]
+        public async Task<ActionResult<APIResponse>> RemoveFromCart(string email, [FromBody] RemoveCartDTO cartRemoveData)
+        {
+            try
+            {
+                if (cartRemoveData == null || email == "")
+                {
+                    return BadRequest();
+                }
+                var userExists = await _userService.GetUserID(email);
+                if (userExists == null)
+                {
+                    throw new Exception(message: "The email you entred is incorrect");
+                }
+                var allProducts = await _productService.GetProducts();
+
+                if (cartRemoveData.Quantity < 1)
+                {
+                    throw new Exception($"{cartRemoveData.ProductSlug} quantity must exceed 0");
+
+                }
+                var enteredProduct = allProducts.FirstOrDefault(prod => prod.Slug == cartRemoveData.ProductSlug);
+
+                if (enteredProduct == null)
+                {
+                    throw new Exception($"{cartRemoveData.ProductSlug} is invalid");
+                }
+                else
+                {
+                    var cartAvailability = await _unitOfWork.CartRepository.Get(cart => cart.UserId == userExists.UserId && enteredProduct.ProductId == cart.ProductId);
+                    if (cartAvailability == null || 0 > (cartAvailability.Quantity - cartRemoveData.Quantity))
+                    {
+                        throw new Exception($"Product had not been added to the cart");
+                    }
+                    else
+                    {
+                        int newCartQty = cartAvailability.Quantity - cartRemoveData.Quantity;
+
+                        CartDTO cartInput = new()
+                        {
+                            UserId = userExists.UserId,
+                            Quantity = newCartQty,
+                            ProductId = enteredProduct.ProductId
+                        };
+
+                        Cart saveCart = _mapper.Map<Cart>(cartInput);
+
+                        await _unitOfWork.CartRepository.Update(saveCart);
+
+                        _response.Result = _mapper.Map<CartDTO>(saveCart);
+                        _response.Status = HttpStatusCode.Created;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
         /*
-                [ProducesResponseType(StatusCodes.Status204NoContent)]
-                [ProducesResponseType(StatusCodes.Status403Forbidden)]
-                [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-                [ProducesResponseType(StatusCodes.Status404NotFound)]
-                [ProducesResponseType(StatusCodes.Status400BadRequest)]
-                [HttpDelete("delete/{email}", Name = "DeleteUser")]
-                public async Task<ActionResult<APIResponse>> DeleteUser(string email)
-                {
-                    try
-                    {
-                        if (email == null || email == "")
+                        [HttpPut("adduserdetails/{email}", Name = "AddUserDetails")]
+                        [ProducesResponseType(StatusCodes.Status204NoContent)]
+                        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+                        public async Task<ActionResult<APIResponse>> AddUserDetails(string email, [FromBody] UserAddDetailsDTO userUpdate)
                         {
-                            return BadRequest();
-                        }
-                        var userToBeDeleted = await _unitOfWork.UserRepository.Get(u => u.Email == email);
-                        if (userToBeDeleted == null)
-                        {
-                            return NotFound();
-                        }
+                            try
+                            {
+                                if (userUpdate == null || email == "")
+                                {
+                                    return BadRequest();
+                                }
+                                User userToBeChanged = await _unitOfWork.UserRepository.Get(u => u.Email == email, false);
 
-                        await _unitOfWork.UserRepository.Remove(userToBeDeleted);
-                        _response.Status = HttpStatusCode.NoContent;
-                        _response.Successful = true;
-                        return Ok(_response);
-                    }
-                    catch (Exception ex)
-                    {
-                        _response.Successful = false;
-                        _response.Errors
-                             = new List<string>() { ex.ToString() };
-                    }
-                    return _response;
-                }
+                                if (userToBeChanged == null)
+                                {
+                                    _response.Status = HttpStatusCode.NotFound;
+                                    _response.Successful = false;
+                                    _response.Errors = new List<string> { "The email you've entered is incorrect" };
+                                    return NotFound(_response);
+                                }
 
-                [HttpPut("adduserdetails/{email}", Name = "AddUserDetails")]
-                [ProducesResponseType(StatusCodes.Status204NoContent)]
-                [ProducesResponseType(StatusCodes.Status400BadRequest)]
-                public async Task<ActionResult<APIResponse>> AddUserDetails(string email, [FromBody] UserAddDetailsDTO userUpdate)
-                {
-                    try
-                    {
-                        if (userUpdate == null || email == "")
-                        {
-                            return BadRequest();
-                        }
-                        User userToBeChanged = await _unitOfWork.UserRepository.Get(u => u.Email == email, false);
+                                User model = _mapper.Map<User>(userToBeChanged);
+                                _mapper.Map(userUpdate, model);
+                                model.UserId = userToBeChanged.UserId;
 
-                        if (userToBeChanged == null)
-                        {
-                            _response.Status = HttpStatusCode.NotFound;
-                            _response.Successful = false;
-                            _response.Errors = new List<string> { "The email you've entered is incorrect" };
-                            return NotFound(_response);
+                                var updatedUser = await _unitOfWork.UserRepository.Update(model);
+                                _response.Status = HttpStatusCode.NoContent;
+                                _response.Successful = true;
+                                _response.Result = updatedUser;
+                                return Ok(_response);
+                            }
+                            catch (Exception ex)
+                            {
+                                _response.Successful = false;
+                                _response.Errors
+                                     = new List<string>() { ex.ToString() };
+                            }
+                            return _response;
                         }
 
-                        User model = _mapper.Map<User>(userToBeChanged);
-                        _mapper.Map(userUpdate, model);
-                        model.UserId = userToBeChanged.UserId;
-
-                        var updatedUser = await _unitOfWork.UserRepository.Update(model);
-                        _response.Status = HttpStatusCode.NoContent;
-                        _response.Successful = true;
-                        _response.Result = updatedUser;
-                        return Ok(_response);
-                    }
-                    catch (Exception ex)
-                    {
-                        _response.Successful = false;
-                        _response.Errors
-                             = new List<string>() { ex.ToString() };
-                    }
-                    return _response;
-                }
 
 
 
-
-        */
+                */
     }
 }
