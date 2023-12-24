@@ -9,6 +9,8 @@ using CartService.Service.IService;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.VisualBasic;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace UserService.Controllers.v1
 {
@@ -79,130 +81,165 @@ namespace UserService.Controllers.v1
         }
 
 
-    }
-}
 
 
-/*
-
-[HttpPost("create", Name = "CreateUser")]
+        [HttpPost("create/{email}", Name = "addToCart")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> CreateUser([FromBody] UserCreateDTO newUserDTO)
+        public async Task<ActionResult<APIResponse>> AddToCart(string email, [FromBody] CartInputDTO cartInputData)
         {
 
             try
             {
-                if (newUserDTO == null)
+                if (email == null || cartInputData == null)
                 {
                     throw new Exception(message: "The data you entered is incorrect!");
                 }
 
-                var userExists = await _unitOfWork.UserRepository.Get(user => user.Email == newUserDTO.Email);
-                if (userExists != null)
+                var userExists = await _userService.GetUserID(email);
+                if (userExists == null)
                 {
-                    throw new Exception(message: "The email you entred is already registered");
+                    throw new Exception(message: "The email you entred is incorrect");
                 }
-                else
+                var allProducts = await _productService.GetProducts();
+                foreach (var cartProduct in cartInputData.CartProducts)
                 {
-                    User newUser = _mapper.Map<User>(newUserDTO);
-                    newUser.Password = HashText.HashPass(newUserDTO.Password);
+                    if (cartProduct.Quantity < 1)
+                    {
+                        throw new Exception($"{cartProduct.ProductSlug} quantity must exceed 0");
 
-                    await _unitOfWork.UserRepository.Add(newUser);
-                    _response.Result = _mapper.Map<UserDTO>(newUser);
-                    _response.Status = HttpStatusCode.Created;
-                    return CreatedAtRoute("GetUser", new { email = newUser.Email }, _response);
+                    }
+                    var enteredProduct = allProducts.FirstOrDefault(prod => prod.Slug == cartProduct.ProductSlug);
+
+                    if (enteredProduct == null)
+                    {
+                        throw new Exception($"{cartProduct.ProductSlug} is invalid");
+                    }
+                    else
+                    {
+                        if (!enteredProduct.Availability || enteredProduct.InStock < cartProduct.Quantity)
+                        {
+                            throw new Exception($"{cartProduct.ProductSlug} product is not available or stock is insufficient");
+                        }
+                        else
+                        {
+                            CartDTO cartInput = new()
+                            {
+                                UserId = userExists.UserId,
+                                Quantity = cartProduct.Quantity,
+                                ProductId = enteredProduct.ProductId
+                            };
+
+                            Cart saveCart = _mapper.Map<Cart>(cartInput);
+
+                            int currentCartQty = 0;
+                            var cartItems = _unitOfWork.CartRepository.Get(item => item.UserId == cartInput.UserId && item.ProductId == cartInput.ProductId);
+                            if (cartItems != null)
+                            {
+                              //  cartInput.Quantity += cartItems
+                                await _unitOfWork.CartRepository.Update(saveCart);
+                            }
+                            else
+                            {
+                                await _unitOfWork.CartRepository.Add(saveCart);
+                            }
+                            _response.Result = _mapper.Map<CartDTO>(saveCart);
+                            _response.Status = HttpStatusCode.Created;
+                        }
+                    }
                 }
-
 
             }
             catch (Exception ex)
             {
                 _response.Successful = false;
                 _response.Errors
-                     = new List<string>() { ex.ToString() };
+                     = new List<string>() { ex.ToString()
+};
                 _response.Status = HttpStatusCode.InternalServerError;
             }
             return _response;
         }
 
-
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpDelete("delete/{email}", Name = "DeleteUser")]
-        public async Task<ActionResult<APIResponse>> DeleteUser(string email)
-        {
-            try
-            {
-                if (email == null || email == "")
+        /*
+                [ProducesResponseType(StatusCodes.Status204NoContent)]
+                [ProducesResponseType(StatusCodes.Status403Forbidden)]
+                [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+                [ProducesResponseType(StatusCodes.Status404NotFound)]
+                [ProducesResponseType(StatusCodes.Status400BadRequest)]
+                [HttpDelete("delete/{email}", Name = "DeleteUser")]
+                public async Task<ActionResult<APIResponse>> DeleteUser(string email)
                 {
-                    return BadRequest();
-                }
-                var userToBeDeleted = await _unitOfWork.UserRepository.Get(u => u.Email == email);
-                if (userToBeDeleted == null)
-                {
-                    return NotFound();
-                }
+                    try
+                    {
+                        if (email == null || email == "")
+                        {
+                            return BadRequest();
+                        }
+                        var userToBeDeleted = await _unitOfWork.UserRepository.Get(u => u.Email == email);
+                        if (userToBeDeleted == null)
+                        {
+                            return NotFound();
+                        }
 
-                await _unitOfWork.UserRepository.Remove(userToBeDeleted);
-                _response.Status = HttpStatusCode.NoContent;
-                _response.Successful = true;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.Successful = false;
-                _response.Errors
-                     = new List<string>() { ex.ToString() };
-            }
-            return _response;
-        }
-
-        [HttpPut("adduserdetails/{email}", Name = "AddUserDetails")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<APIResponse>> AddUserDetails(string email, [FromBody] UserAddDetailsDTO userUpdate)
-        {
-            try
-            {
-                if (userUpdate == null || email == "")
-                {
-                    return BadRequest();
-                }
-                User userToBeChanged = await _unitOfWork.UserRepository.Get(u => u.Email == email, false);
-
-                if (userToBeChanged == null)
-                {
-                    _response.Status = HttpStatusCode.NotFound;
-                    _response.Successful = false;
-                    _response.Errors = new List<string> { "The email you've entered is incorrect" };
-                    return NotFound(_response);
+                        await _unitOfWork.UserRepository.Remove(userToBeDeleted);
+                        _response.Status = HttpStatusCode.NoContent;
+                        _response.Successful = true;
+                        return Ok(_response);
+                    }
+                    catch (Exception ex)
+                    {
+                        _response.Successful = false;
+                        _response.Errors
+                             = new List<string>() { ex.ToString() };
+                    }
+                    return _response;
                 }
 
-                User model = _mapper.Map<User>(userToBeChanged);
-                _mapper.Map(userUpdate, model);
-                model.UserId = userToBeChanged.UserId;
+                [HttpPut("adduserdetails/{email}", Name = "AddUserDetails")]
+                [ProducesResponseType(StatusCodes.Status204NoContent)]
+                [ProducesResponseType(StatusCodes.Status400BadRequest)]
+                public async Task<ActionResult<APIResponse>> AddUserDetails(string email, [FromBody] UserAddDetailsDTO userUpdate)
+                {
+                    try
+                    {
+                        if (userUpdate == null || email == "")
+                        {
+                            return BadRequest();
+                        }
+                        User userToBeChanged = await _unitOfWork.UserRepository.Get(u => u.Email == email, false);
 
-                var updatedUser = await _unitOfWork.UserRepository.Update(model);
-                _response.Status = HttpStatusCode.NoContent;
-                _response.Successful = true;
-                _response.Result = updatedUser;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.Successful = false;
-                _response.Errors
-                     = new List<string>() { ex.ToString() };
-            }
-            return _response;
-        }
+                        if (userToBeChanged == null)
+                        {
+                            _response.Status = HttpStatusCode.NotFound;
+                            _response.Successful = false;
+                            _response.Errors = new List<string> { "The email you've entered is incorrect" };
+                            return NotFound(_response);
+                        }
+
+                        User model = _mapper.Map<User>(userToBeChanged);
+                        _mapper.Map(userUpdate, model);
+                        model.UserId = userToBeChanged.UserId;
+
+                        var updatedUser = await _unitOfWork.UserRepository.Update(model);
+                        _response.Status = HttpStatusCode.NoContent;
+                        _response.Successful = true;
+                        _response.Result = updatedUser;
+                        return Ok(_response);
+                    }
+                    catch (Exception ex)
+                    {
+                        _response.Successful = false;
+                        _response.Errors
+                             = new List<string>() { ex.ToString() };
+                    }
+                    return _response;
+                }
 
 
 
 
-*/
+        */
+    }
+}
