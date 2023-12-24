@@ -20,5 +20,7 @@ namespace OrderService.Models
         public Order ParentOrder { get; set; }
         public int ProductId { get; set; }
         public int Quantity { get; set; }
+        public float Total { get; set; }
+
     }
 }
