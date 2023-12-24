@@ -6,5 +6,5 @@ namespace CartService.Repository;
 
 public interface ICartRepository : IRepository<Cart>
 {
-
+    Task RemoveMany(Expression<Func<Cart, bool>> filter);
 }

@@ -130,7 +130,7 @@ namespace UserService.Controllers.v1
 
                             Cart saveCart = _mapper.Map<Cart>(cartInput);
 
-                            var cartItem = await _unitOfWork.CartRepository.Get(item => item.UserId == cartInput.UserId && item.ProductId == cartInput.ProductId);
+                            var cartItem = await _unitOfWork.CartRepository.Get(item => item.UserId == cartInput.UserId && item.ProductId == cartInput.ProductId, tracked: false);
                             if (cartItem != null)
                             {
                                 saveCart.Quantity += cartItem.Quantity;
@@ -194,7 +194,7 @@ namespace UserService.Controllers.v1
                 }
                 else
                 {
-                    var cartAvailability = await _unitOfWork.CartRepository.Get(cart => cart.UserId == userExists.UserId && enteredProduct.ProductId == cart.ProductId);
+                    var cartAvailability = await _unitOfWork.CartRepository.Get(cart => cart.UserId == userExists.UserId && enteredProduct.ProductId == cart.ProductId, tracked: false);
                     if (cartAvailability == null || 0 > (cartAvailability.Quantity - cartRemoveData.Quantity))
                     {
                         throw new Exception($"Product had not been added to the cart");
@@ -229,50 +229,40 @@ namespace UserService.Controllers.v1
             }
             return _response;
         }
-        /*
-                        [HttpPut("adduserdetails/{email}", Name = "AddUserDetails")]
-                        [ProducesResponseType(StatusCodes.Status204NoContent)]
-                        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-                        public async Task<ActionResult<APIResponse>> AddUserDetails(string email, [FromBody] UserAddDetailsDTO userUpdate)
-                        {
-                            try
-                            {
-                                if (userUpdate == null || email == "")
-                                {
-                                    return BadRequest();
-                                }
-                                User userToBeChanged = await _unitOfWork.UserRepository.Get(u => u.Email == email, false);
-
-                                if (userToBeChanged == null)
-                                {
-                                    _response.Status = HttpStatusCode.NotFound;
-                                    _response.Successful = false;
-                                    _response.Errors = new List<string> { "The email you've entered is incorrect" };
-                                    return NotFound(_response);
-                                }
-
-                                User model = _mapper.Map<User>(userToBeChanged);
-                                _mapper.Map(userUpdate, model);
-                                model.UserId = userToBeChanged.UserId;
-
-                                var updatedUser = await _unitOfWork.UserRepository.Update(model);
-                                _response.Status = HttpStatusCode.NoContent;
-                                _response.Successful = true;
-                                _response.Result = updatedUser;
-                                return Ok(_response);
-                            }
-                            catch (Exception ex)
-                            {
-                                _response.Successful = false;
-                                _response.Errors
-                                     = new List<string>() { ex.ToString() };
-                            }
-                            return _response;
-                        }
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpDelete("removefullcart/{email}", Name = "RemoveFullCart")]
+        public async Task<ActionResult<APIResponse>> RemoveFullCart(string email)
+        {
+            try
+            {
+                if (email == null || email == "")
+                {
+                    return BadRequest();
+                }
+                var userExists = await _userService.GetUserID(email);
+                if (userExists == null)
+                {
+                    throw new Exception(message: "The email you entred is incorrect");
+                }
 
 
+                await _unitOfWork.CartRepository.RemoveMany(cartEntry => userExists.UserId == cartEntry.UserId);
 
-
-                */
+                _response.Result = $"Removed all items of cart: {email}";
+                _response.Status = HttpStatusCode.Created;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
     }
 }

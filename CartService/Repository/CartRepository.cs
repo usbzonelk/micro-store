@@ -14,5 +14,10 @@ public class CartRepository : Repository<Cart>, ICartRepository
     {
         _db = db;
     }
-
+    public async Task RemoveMany(Expression<Func<Cart, bool>> filter)
+    {
+        var deletedEntries = await dbSet.Where(filter).ToListAsync();
+        dbSet.RemoveRange(deletedEntries);
+        await Save();
+    }
 }

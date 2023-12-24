@@ -9,6 +9,7 @@ namespace CartService
         public Mappings()
         {
             CreateMap<Cart, CartDTO>().ReverseMap();
+            CreateMap<Cart, UserCartItemDTO>().ReverseMap();
 
         }
     }
