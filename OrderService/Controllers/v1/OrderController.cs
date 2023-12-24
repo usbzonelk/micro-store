@@ -37,6 +37,44 @@ namespace OrderService.Controllers.v1
             _cartService = cartService;
 
         }
+        [HttpGet("/allorders/{email}", Name = "GetAllOrders")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetAllOrders(string email)
+        {
+            IEnumerable<Order> allOrders = null;
+            try
+            {
+                if (email == null)
+                {
+                    throw new Exception("Email is invalid!");
+                }
+                var userFound = await _userService.GetUserID(email);
+
+                if (userFound == null || userFound.IsActive == false)
+                {
+                    throw new Exception("Email is invalid or account is inactive!");
+                }
+                int userID = userFound.UserId;
+
+                allOrders = await _unitOfWork.OrderRepository.GetMany(order => order.UserId == userID);
+                
+                _response.Result = _mapper.Map<List<Order>>(allOrders);
+                _response.Status = HttpStatusCode.OK;
+                return Ok(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+
+            return _response;
+        }
 
 
     }

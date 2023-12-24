@@ -8,7 +8,7 @@ namespace OrderService
     {
         public Mapping()
         {
-
+            CreateMap<OrderItemDTO, OrderItem>().ReverseMap();
         }
     }
 
