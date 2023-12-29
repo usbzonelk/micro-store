@@ -1,5 +1,4 @@
 using GatewayService.Models.DTO;
-using GatewayService.Services;
 
 using Newtonsoft.Json;
 

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using GatewayService;
-using GatewayService.Service;
+using GatewayService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserService, UsersService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-builder.Services.AddAutoMapper(typeof(Mappings));
+//builder.Services.AddAutoMapper(typeof(Mappings));
 
 builder.Services.AddHttpClient("Product", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]));
 builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:UserAPI"]));

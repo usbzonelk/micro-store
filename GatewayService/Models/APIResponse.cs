@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 
-namespace GatewayService.Models
+namespace GatewayService.Models.DTO
 {
     public class APIResponse
     {
