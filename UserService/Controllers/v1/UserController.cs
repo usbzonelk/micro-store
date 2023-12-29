@@ -289,6 +289,46 @@ namespace UserService.Controllers.v1
 
             }
         }
+
+        [HttpPatch("togglestatus/{email}", Name = "ToggleUserStatus")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ToggleUserStatus(string email)
+        {
+            if (email is null)
+            {
+                return BadRequest();
+            }
+            var user = await _unitOfWork.UserRepository.Get(u => u.Email == email, tracked: false);
+
+            if (user is null)
+            {
+                _response.Status = HttpStatusCode.NotFound;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "The email you've entered is incorrect" };
+                return NotFound(_response);
+            }
+            if (user.IsVerified is false)
+            {
+                _response.Status = HttpStatusCode.BadRequest;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "Please verify your account first!" };
+                return BadRequest(_response);
+            }
+            else
+            {
+                user.IsActive = !user.IsActive;
+                var result = await _unitOfWork.UserRepository.Update(user);
+
+                _response.Status = HttpStatusCode.OK;
+                _response.Successful = true;
+                _response.Result = $"You've successfully updated account status";
+                return Ok(_response);
+
+            }
+        }
+
+
         [HttpPatch("updatepassword/", Name = "UpdateUserPassword")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
