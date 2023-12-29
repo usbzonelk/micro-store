@@ -9,6 +9,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AdminServiceDBContext>(dbOptions => dbOptions.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddAutoMapper(typeof(Mappings));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

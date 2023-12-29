@@ -9,7 +9,7 @@ namespace AdminService
         public Mappings()
         {
             CreateMap<Admin, AdminDTO>().ReverseMap();
-            CreateMap<AdminInputDTO, AdminDTO>().ReverseMap();
+            CreateMap<AdminInputDTO, Admin>().ReverseMap();
         }
     }
 
