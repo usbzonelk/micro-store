@@ -191,6 +191,41 @@ namespace AdminService.Controllers.v1
 
         }
 
+
+        [HttpPatch("togglestatus/{email}", Name = "ToggleAdminStatus")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ToggleAdminStatus(string email)
+        {
+            if (email is null)
+            {
+                return BadRequest();
+            }
+            var admin = await _unitOfWork.AdminRepository.Get(u => u.Email == email, tracked: false);
+
+            if (admin is null)
+            {
+                _response.Status = HttpStatusCode.NotFound;
+                _response.Successful = false;
+                _response.Errors = new List<string> { "The email you've entered is incorrect" };
+                return NotFound(_response);
+            }
+            else
+            {
+                admin.IsActive = !admin.IsActive;
+                var result = await _unitOfWork.AdminRepository.Update(admin);
+
+                _response.Status = HttpStatusCode.OK;
+                _response.Successful = true;
+                _response.Result = $"You've successfully updated account status";
+                return Ok(_response);
+            }
+        }
+
+
+
+
+
         [HttpPost("authorize", Name = "AuthAdmin")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
