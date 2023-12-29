@@ -1,18 +1,18 @@
 using Microsoft.EntityFrameworkCore;
-using CartService.Data;
-using CartService.Repository;
+using AdminService.Data;
+using AdminService.Repository;
 
-namespace CartService.Repository;
+namespace AdminService.Repository;
 
 public class UnitOfWork : IUnitOfWork
 {
-    public ICartRepository CartRepository { get; set; }
-    private CartServiceDBContext _db;
+    public IAdminRepository AdminRepository { get; set; }
+    private AdminServiceDBContext _db;
 
-    public UnitOfWork(CartServiceDBContext db)
+    public UnitOfWork(AdminServiceDBContext db)
     {
         _db = db;
-        CartRepository = new CartRepository(_db);
+        AdminRepository = new AdminRepository(_db);
     }
     public void Save()
     {

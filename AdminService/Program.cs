@@ -1,16 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using AdminService;
 using AdminService.Data;
-/* using AdminService.Repository;
-using AdminService.Service.IService;
-using AdminService.ShoppingCartAPI.Service; */
+using AdminService.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AdminServiceDBContext>(dbOptions => dbOptions.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

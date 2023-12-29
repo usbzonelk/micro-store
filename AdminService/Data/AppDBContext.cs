@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-//using AdminService.Models;
+using AdminService.Models;
 
 namespace AdminService.Data
 {
@@ -19,7 +19,7 @@ namespace AdminService.Data
 
         }
 
-        // public DbSet<Admin> Admins { get; set; }
+        public DbSet<Admin> Admins { get; set; }
 
     }
 
