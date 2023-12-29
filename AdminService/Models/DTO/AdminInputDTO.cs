@@ -3,9 +3,9 @@ using AdminService.Models;
 
 namespace AdminService.Models.DTO
 {
-    public class AdminDTO
+    public class AdminInputDTO
     {
-        public bool IsActive { get; set; }
+        public string Password { get; set; }
         public string Email { get; set; }
 
     }
