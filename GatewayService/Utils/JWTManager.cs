@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace GatewayService.Utils
 {
-    public class JWTManager
+    public static class JWTManager
     {
         private static readonly string _secretKey = "theSecret";
 

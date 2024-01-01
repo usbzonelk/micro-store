@@ -1,5 +1,6 @@
 using GatewayService;
 using GatewayService.Services;
+using GatewayService.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseAuthCheckMiddleware();
 
 app.MapControllers();
 

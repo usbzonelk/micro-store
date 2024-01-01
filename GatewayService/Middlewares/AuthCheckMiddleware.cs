@@ -1,6 +1,9 @@
+using System;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using GatewayService.Utils;
 
 namespace GatewayService.Middlewares
 {
@@ -15,10 +18,25 @@ namespace GatewayService.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Modify or add data to the request
-            context.Items["MyKey"] = "MyValue";
+            context.User = null;
+            try
+            {
+                var authorizationHeader = context.Request.Headers.Authorization.ToString();
+                
+                if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    var jwtToken = authorizationHeader.Substring("Bearer ".Length).Trim();
 
-            // Call the next middleware in the pipeline
+                    var principal = JWTManager.DecodeJwt(jwtToken);
+
+                    context.User = principal;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
             await _next(context);
         }
     }
