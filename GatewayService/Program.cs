@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using GatewayService;
 using GatewayService.Services;
 
