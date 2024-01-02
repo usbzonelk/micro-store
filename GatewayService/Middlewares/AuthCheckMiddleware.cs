@@ -18,11 +18,12 @@ namespace GatewayService.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
+            Console.WriteLine("\n\ncvfvfvfvf\n\n");
             context.User = null;
             try
             {
                 var authorizationHeader = context.Request.Headers.Authorization.ToString();
-                
+
                 if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
                     var jwtToken = authorizationHeader.Substring("Bearer ".Length).Trim();
