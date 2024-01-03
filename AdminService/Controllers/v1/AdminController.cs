@@ -42,7 +42,7 @@ namespace AdminService.Controllers.v1
             try
             {
                 allAdmins = await _unitOfWork.AdminRepository.GetAll();
-                _response.Result = _mapper.Map<List<Admin>>(allAdmins);
+                _response.Result = _mapper.Map<List<AdminDTO>>(allAdmins);
                 _response.Status = HttpStatusCode.OK;
                 return Ok(_response);
 
@@ -243,13 +243,17 @@ namespace AdminService.Controllers.v1
                 var adminExists = await _unitOfWork.AdminRepository.Get(admin => admin.Email == adminLogins.Email);
                 if (adminExists == null)
                 {
-                    throw new Exception(message: "The email you entred is not registered");
+                    _response.Successful = false;
+                    _response.Result = "Incorrect Email!";
+                    _response.Status = HttpStatusCode.Forbidden;
+                    return BadRequest(_response);
                 }
                 else
                 {
                     bool passVerify = HashText.VerifyPass(adminLogins.Password, adminExists.Password);
                     if (!passVerify)
                     {
+                        _response.Successful = false;
                         _response.Result = "Incorrect password!";
                         _response.Status = HttpStatusCode.Forbidden;
                         return BadRequest(_response);

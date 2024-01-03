@@ -5,30 +5,7 @@ using GatewayService;
 using GatewayService.Services;
 using GatewayService.Middlewares;
 using GatewayService.Utils;
-using System.Security.Claims;
 
-IEnumerable<Claim> claims = new List<Claim>
-{
-    // User identity claims
-    new Claim(ClaimTypes.Name, "john.doe"),
-    new Claim(ClaimTypes.Email, "john.doe@example.com"),
-    new Claim(ClaimTypes.NameIdentifier, "12345"),
-
-    // Custom claims
-    new Claim("customClaimType", "customClaimValue"),
-    new Claim("role", "admin"),
-
-    // Role claims
-    new Claim(ClaimTypes.Role, "Administrator"),
-    new Claim(ClaimTypes.Role, "User"),
-
-    // Additional claims
-    new Claim("customClaim2", "value2"),
-    new Claim("customClaim3", "value3"),
-};
-
-var uu = JWTManager.GenerateJwt(claims, DateTime.Now.AddDays(456));
-Console.WriteLine($"\n\n{uu}\n\n\n");
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthentication(options =>
@@ -76,6 +53,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 app.Run();
