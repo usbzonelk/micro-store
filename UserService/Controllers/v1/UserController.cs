@@ -409,6 +409,7 @@ namespace UserService.Controllers.v1
                     bool passVerify = HashText.VerifyPass(userLogins.Password, userExists.Password);
                     if (!passVerify)
                     {
+                        _response.Successful = false;
                         _response.Result = "Incorrect password!";
                         _response.Status = HttpStatusCode.Forbidden;
                         return BadRequest(_response);
