@@ -19,7 +19,7 @@ namespace GatewayService.Services
             var output = new GeneralCustomAPIOutput<IEnumerable<CartDTO>> { IsSuccessful = false, Output = new List<CartDTO> { } };
             try
             {
-                var client = _httpClientFactory.CreateClient("Product");
+                var client = _httpClientFactory.CreateClient("Cart");
                 var response = await client.GetAsync($"/api/v1/carts/{email}");
                 var apiContet = await response.Content.ReadAsStringAsync();
                 var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
@@ -44,7 +44,7 @@ namespace GatewayService.Services
             var postContent = new StringContent(jsonPost, Encoding.UTF8, "application/json");
             try
             {
-                var client = _httpClientFactory.CreateClient("Product");
+                var client = _httpClientFactory.CreateClient("Cart");
                 var response = await client.PostAsync($"/api/v1/carts/addtocart/{email}", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
                 var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
@@ -67,7 +67,7 @@ namespace GatewayService.Services
 
             try
             {
-                var client = _httpClientFactory.CreateClient("Product");
+                var client = _httpClientFactory.CreateClient("Cart");
                 var response = await client.DeleteAsync($"/api/v1/carts/removefullcart/{email}");
                 var apiContet = await response.Content.ReadAsStringAsync();
                 var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
