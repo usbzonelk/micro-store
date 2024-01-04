@@ -52,7 +52,8 @@ namespace GatewayService.Services
                 if (resp.Successful)
                 {
                     output.Output = true;
-                    output.IsSuccessful = true;
+                    output.IsSuccessful = (resp.Result is "Cart is empty") ? false : true;
+
                 }
                 return output;
             }

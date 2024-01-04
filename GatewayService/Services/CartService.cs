@@ -6,11 +6,11 @@ using Newtonsoft.Json;
 
 namespace GatewayService.Services
 {
-    public class CartService : ICartService
+    public class CartServiceC : ICartService
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public CartService(IHttpClientFactory clientFactory)
+        public CartServiceC(IHttpClientFactory clientFactory)
         {
             _httpClientFactory = clientFactory;
         }

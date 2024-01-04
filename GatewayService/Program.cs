@@ -32,11 +32,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserService, UsersService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<ICartService, CartServiceC>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 //builder.Services.AddAutoMapper(typeof(Mappings));
 
 builder.Services.AddHttpClient("Product", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]));
 builder.Services.AddHttpClient("User", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:UserAPI"]));
+builder.Services.AddHttpClient("Cart", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CartAPI"]));
 builder.Services.AddHttpClient("Admin", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AdminAPI"]));
+builder.Services.AddHttpClient("Order", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:OrderAPI"]));
 
 var app = builder.Build();
 
