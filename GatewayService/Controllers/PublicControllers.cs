@@ -173,7 +173,7 @@ namespace GatewayService.PublicControllers.v1
 
                     return NotFound(_response);
                 }
-                var userFound = await _userService.CreateNewUser(userInfo);
+                UserLoginDTO userFound = await _userService.CreateNewUser(userInfo);
 
                 if (userFound == null)
                 {
@@ -199,6 +199,51 @@ namespace GatewayService.PublicControllers.v1
             }
             return _response;
         }
+
+        [HttpGet("verify/user", Name = "VarifyUser")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIOutDTO>> VarifyUser([FromQuery] VerifyUserDTO verifyInfo)
+        {
+            try
+            {
+                if ((verifyInfo.Email is null) || (verifyInfo.UserToken is null))
+                {
+                    _response.Status = HttpStatusCode.NotFound;
+                    _response.Result = false;
+                    _response.Successful = false;
+
+                    return NotFound(_response);
+                }
+                bool userVerification = await _userService.VerifyUser(verifyInfo);
+
+                if (userVerification == null || userVerification is false)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = false;
+                    _response.Successful = false;
+
+                    return NotFound(_response);
+                }
+                else
+                {
+                    _response.Status = HttpStatusCode.OK;
+                    _response.Result = true;
+                    return Ok(_response);
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+
 
         [HttpPost("register/admin", Name = "RegisterAdmin")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Web;
 using GatewayService.Models.DTO;
 using GatewayService.Services;
 
@@ -81,9 +82,12 @@ namespace GatewayService.Services
 
             try
             {
+                verifyInfo.UserToken = HttpUtility.UrlEncode(verifyInfo.UserToken);
+
                 var response = await client.PatchAsync($"/api/v1/users/verify/{verifyInfo.Email}?userToken={verifyInfo.UserToken}", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
                 var resp = JsonConvert.DeserializeObject<APIResponse<object>>(apiContet);
+
                 return resp.Successful ? true : false;
             }
             catch (Exception e)
