@@ -23,10 +23,9 @@ namespace GatewayService.Services
                 var response = await client.GetAsync($"/api/v1/products");
                 var apiContet = await response.Content.ReadAsStringAsync();
                 var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<ProductDTO>>>(apiContet);
-                if (resp.Successful)
+                if (resp.Successful is true)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<IEnumerable<ProductDTO>>(Convert.ToString(resp.Result));
-                    output.Output = apiRes;
+                    output.Output = resp.Result;
                     output.IsSuccessful = true;
                 }
                 return output;
@@ -48,8 +47,7 @@ namespace GatewayService.Services
                 var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<ProductDTO>>>(apiContet);
                 if (resp.Successful)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<IEnumerable<ProductDTO>>(Convert.ToString(resp.Result));
-                    output.Output = apiRes;
+                    output.Output = resp.Result;
                     output.IsSuccessful = true;
                 }
                 return output;
@@ -70,8 +68,7 @@ namespace GatewayService.Services
                 var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<ProductDTO>>>(apiContet);
                 if (resp.Successful)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<IEnumerable<ProductDTO>>(Convert.ToString(resp.Result));
-                    output.Output = apiRes;
+                    output.Output = resp.Result;
                     output.IsSuccessful = true;
                 }
                 return output;
@@ -92,8 +89,7 @@ namespace GatewayService.Services
                 var resp = JsonConvert.DeserializeObject<APIResponse<ProductDTO>>(apiContet);
                 if (resp.Successful)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(resp.Result));
-                    output.Output = apiRes;
+                    output.Output = resp.Result;
                     output.IsSuccessful = true;
                 }
                 return output;
@@ -117,8 +113,7 @@ namespace GatewayService.Services
                 var resp = JsonConvert.DeserializeObject<APIResponse<ProductDTO>>(apiContet);
                 if (resp.Successful)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(resp.Result));
-                    output.Output = apiRes;
+                    output.Output = resp.Result;
                     output.IsSuccessful = true;
                 }
                 return output;
@@ -142,8 +137,7 @@ namespace GatewayService.Services
                 var resp = JsonConvert.DeserializeObject<APIResponse<ProductDTO>>(apiContet);
                 if (resp.Successful)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(resp.Result));
-                    output.Output = apiRes;
+                    output.Output = resp.Result;
                     output.IsSuccessful = true;
                 }
                 return output;

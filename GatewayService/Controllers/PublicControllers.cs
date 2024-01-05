@@ -16,7 +16,7 @@ using Newtonsoft.Json;
 
 namespace GatewayService.PublicControllers.v1
 {
-    [Route("api/v1/public")]
+    [Route("api/v1/public/login")]
     [ApiController]
     //[ApiVersion("2.0")]
     public class AuthController : ControllerBase
@@ -139,7 +139,7 @@ namespace GatewayService.PublicControllers.v1
         }
     }
 
-    [Route("api/v1/public")]
+    [Route("api/v1/public/reg")]
     [ApiController]
     public class RegistrationController : ControllerBase
     {
@@ -155,7 +155,7 @@ namespace GatewayService.PublicControllers.v1
             _adminService = adminService;
         }
 
-        [HttpPost("register/user", Name = "ResgisterUser")]
+        [HttpPost("user", Name = "ResgisterUser")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -245,7 +245,7 @@ namespace GatewayService.PublicControllers.v1
         }
 
 
-        [HttpPost("register/admin", Name = "RegisterAdmin")]
+        [HttpPost("admin", Name = "RegisterAdmin")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -279,6 +279,136 @@ namespace GatewayService.PublicControllers.v1
                     _response.Result = true;
                     return Ok(_response);
                 }
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+    }
+    [Route("api/v1/public/products")]
+    [ApiController]
+    public class ProductsController : ControllerBase
+    {
+        private readonly ILogger<AuthController> _logger;
+        protected APIOutDTO _response;
+        private IProductService _productService;
+        public ProductsController(ILogger<AuthController> logger, IProductService productService)
+        {
+            _logger = logger;
+            _response = new();
+            _productService = productService;
+        }
+
+        [HttpGet("getAll", Name = "GetAllProducts")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIOutDTO>> GetAllProducts()
+        {
+            try
+            {
+                var allProducts = await _productService.GetProducts();
+
+                if (allProducts is null || allProducts.IsSuccessful is false)
+                {
+                    _response.Status = HttpStatusCode.NotFound;
+                    _response.Result = null;
+                    _response.Successful = false;
+
+                    return NotFound(_response);
+                }
+                else
+                {
+                    _response.Status = HttpStatusCode.OK;
+                    _response.Result = allProducts;
+                    return Ok(_response);
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+
+        [HttpGet("product/{slug}", Name = "GetProduct")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIOutDTO>> GetProduct(string slug)
+        {
+            try
+            {
+                if (slug is null)
+                {
+                    _response.Status = HttpStatusCode.NotFound;
+                    _response.Result = null;
+                    _response.Successful = false;
+
+                    return BadRequest(_response);
+                }
+                var productFound = await _productService.GetProduct(slug);
+
+                if (productFound is null || productFound.IsSuccessful is false || productFound.Output is null)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
+                    _response.Successful = false;
+
+                    return NotFound(_response);
+                }
+                else
+                {
+                    _response.Status = HttpStatusCode.OK;
+                    _response.Result = productFound;
+                    return Ok(_response);
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+
+
+        [HttpGet("search/{query}", Name = "SearchProducts")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIOutDTO>> SearchProducts(string query)
+        {
+            try
+            {
+                if (query is null)
+                {
+                    _response.Status = HttpStatusCode.NotFound;
+                    _response.Result = null;
+                    _response.Successful = false;
+
+                    return NotFound(_response);
+                }
+                var adminFound = await _productService.SearchProducts(query);
+
+                _response.Status = HttpStatusCode.OK;
+                _response.Result = adminFound;
+
+                return Ok(_response);
+
             }
             catch (Exception ex)
             {
