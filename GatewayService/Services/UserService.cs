@@ -22,7 +22,7 @@ namespace GatewayService.Services
             {
                 var response = await client.GetAsync($"/api/v1/users/{email}");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<UserDTO>>(apiContet);
                 if (resp.Successful)
                 {
                     return JsonConvert.DeserializeObject<UserDTO>(Convert.ToString(resp.Result));
@@ -45,7 +45,7 @@ namespace GatewayService.Services
             {
                 var response = await client.PostAsync($"/api/v1/users/authorize", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<object>>(apiContet);
                 return resp.Successful ? true : false;
             }
             catch (Exception e)
@@ -61,7 +61,7 @@ namespace GatewayService.Services
             {
                 var response = await client.GetAsync($"/api/v1/users");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<List<UserDTO>>>(apiContet);
                 if (resp.Successful)
                 {
                     return JsonConvert.DeserializeObject<List<UserDTO>>(Convert.ToString(resp.Result));
@@ -83,7 +83,7 @@ namespace GatewayService.Services
             {
                 var response = await client.PatchAsync($"/api/v1/users/verify/{verifyInfo.Email}?userToken={verifyInfo.UserToken}", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<object>>(apiContet);
                 return resp.Successful ? true : false;
             }
             catch (Exception e)
@@ -101,7 +101,7 @@ namespace GatewayService.Services
             {
                 var response = await client.PatchAsync($"/api/v1/users/togglestatus/{email}", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<object>>(apiContet);
                 return resp.Successful ? true : false;
             }
             catch (Exception e)
@@ -119,7 +119,7 @@ namespace GatewayService.Services
             {
                 var response = await client.PostAsync($"/api/v1/users/create/", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<UserLoginDTO>>(apiContet);
                 if (resp.Successful)
                 {
                     return JsonConvert.DeserializeObject<UserLoginDTO>(Convert.ToString(resp.Result));
@@ -145,7 +145,7 @@ namespace GatewayService.Services
             {
                 var response = await client.PatchAsync($"/api/v1/users/updatepassword", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<string>>(apiContet);
 
                 if (resp.Successful)
                 {
@@ -184,7 +184,7 @@ namespace GatewayService.Services
             {
                 var response = await client.PutAsync($"/api/v1/users/adduserdetails/{registerInfo.Email}", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<UserRegisterDTO>>(apiContet);
 
                 if (resp.Successful)
                 {

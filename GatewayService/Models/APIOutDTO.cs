@@ -3,15 +3,15 @@ using System.Net;
 
 namespace GatewayService.Models.DTO
 {
-    public class APIResponse <T>
+    public class APIOutDTO 
     {
-        public APIResponse()
+        public APIOutDTO()
         {
             Errors = new List<string>();
         }
         public HttpStatusCode Status { get; set; }
         public bool Successful { get; set; } = true;
         public List<string> Errors { get; set; }
-        public T Result { get; set; }
+        public object Result { get; set; }
     }
 }

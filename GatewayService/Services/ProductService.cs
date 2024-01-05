@@ -22,7 +22,7 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Product");
                 var response = await client.GetAsync($"/api/v1/products");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<ProductDTO>>>(apiContet);
                 if (resp.Successful)
                 {
                     var apiRes = JsonConvert.DeserializeObject<IEnumerable<ProductDTO>>(Convert.ToString(resp.Result));
@@ -45,7 +45,7 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Product");
                 var response = await client.GetAsync($"/api/v1/products/type/{typeName}");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<ProductDTO>>>(apiContet);
                 if (resp.Successful)
                 {
                     var apiRes = JsonConvert.DeserializeObject<IEnumerable<ProductDTO>>(Convert.ToString(resp.Result));
@@ -67,7 +67,7 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Product");
                 var response = await client.GetAsync($"/api/v1/products/search?query={query}");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<ProductDTO>>>(apiContet);
                 if (resp.Successful)
                 {
                     var apiRes = JsonConvert.DeserializeObject<IEnumerable<ProductDTO>>(Convert.ToString(resp.Result));
@@ -89,7 +89,7 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Product");
                 var response = await client.GetAsync($"/api/v1/products/{slug}");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<ProductDTO>>(apiContet);
                 if (resp.Successful)
                 {
                     var apiRes = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(resp.Result));
@@ -114,7 +114,7 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Product");
                 var response = await client.PostAsync($"/api/v1/products/create", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<ProductDTO>>(apiContet);
                 if (resp.Successful)
                 {
                     var apiRes = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(resp.Result));
@@ -139,7 +139,7 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Product");
                 var response = await client.PutAsync($"/api/v1/products/update/{slug}", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<ProductDTO>>(apiContet);
                 if (resp.Successful)
                 {
                     var apiRes = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(resp.Result));
@@ -162,7 +162,7 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Product");
                 var response = await client.DeleteAsync($"/api/v1/products/delete/{slug}");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<object>>(apiContet);
                 if (resp.Successful)
                 {
                     output.Output = true;

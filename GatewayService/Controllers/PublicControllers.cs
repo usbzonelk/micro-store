@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.VisualBasic;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Claims;
+using Newtonsoft.Json;
 
 namespace GatewayService.PublicControllers.v1
 {
@@ -21,7 +22,7 @@ namespace GatewayService.PublicControllers.v1
     public class CartsController : ControllerBase
     {
         private readonly ILogger<CartsController> _logger;
-        protected APIResponse _response;
+        protected APIOutDTO _response;
         private readonly IMapper _mapper;
         private IProductService _productService;
         private IUserService _userService;
@@ -45,7 +46,7 @@ namespace GatewayService.PublicControllers.v1
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<APIResponse>> LogInUser(UserLoginDTO userInfo)
+        public async Task<ActionResult<APIOutDTO>> LogInUser(UserLoginDTO userInfo)
         {
             UserLoginOutput userLoginOutput = new();
             try
@@ -96,7 +97,7 @@ namespace GatewayService.PublicControllers.v1
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<APIResponse>> LogInAdmin(AdminSignupDTO adminInfo)
+        public async Task<ActionResult<APIOutDTO>> LogInAdmin(AdminSignupDTO adminInfo)
         {
             UserLoginOutput userLoginOutput = new();
             try
