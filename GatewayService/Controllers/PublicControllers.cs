@@ -1,24 +1,18 @@
 using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using GatewayService;
 using GatewayService.Models.DTO;
 using GatewayService.Services;
 using GatewayService.Utils;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.VisualBasic;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Claims;
-using Newtonsoft.Json;
 
 namespace GatewayService.PublicControllers.v1
 {
     [Route("api/v1/public/login")]
     [ApiController]
-    //[ApiVersion("2.0")]
     public class AuthController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
