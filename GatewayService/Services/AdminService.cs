@@ -104,13 +104,13 @@ namespace GatewayService.Services
             var resp = JsonConvert.DeserializeObject<APIResponse>(apiContet);
             if (resp.Successful)
             {
-                return JsonConvert.DeserializeObject<string>(Convert.ToString(resp.Result));
+                return Convert.ToString(resp.Result);
             }
             else
             {
                 var toBeSerialized = (resp.Result is not null) ? resp.Result : resp.Errors;
                 toBeSerialized = toBeSerialized is null ? "" : toBeSerialized;
-                return JsonConvert.DeserializeObject<string>(Convert.ToString(toBeSerialized));
+                return Convert.ToString(toBeSerialized);
             }
         }
         public async Task<List<AdminDTO>> GetAllAdmins()
