@@ -369,7 +369,7 @@ namespace UserService.Controllers.v1
                 {
                     _response.Status = HttpStatusCode.Forbidden;
                     _response.Successful = false;
-                    _response.Result = new List<string> { "The old password is incorrect!" };
+                    _response.Result = "The old password is incorrect!";
                     return NotFound(_response);
                 }
                 user.Password = HashText.HashPass(updateInfo.Password);

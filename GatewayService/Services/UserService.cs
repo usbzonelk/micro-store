@@ -150,11 +150,10 @@ namespace GatewayService.Services
                 var response = await client.PatchAsync($"/api/v1/users/updatepassword", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
                 var resp = JsonConvert.DeserializeObject<APIResponse<string>>(apiContet);
-
+                Console.WriteLine($"\n\n153\n{JsonConvert.SerializeObject(resp.Result)}\n\n");
                 if (resp.Successful)
                 {
-                    var res = JsonConvert.DeserializeObject<string>(Convert.ToString(resp.Result));
-                    outputMsg.Message = res;
+                    outputMsg.Message = resp.Result;
                     return outputMsg;
                 }
                 else
@@ -162,11 +161,11 @@ namespace GatewayService.Services
                     outputMsg.IsSuccessful = false;
                     if (resp.Result is not null)
                     {
-                        outputMsg.Message = JsonConvert.DeserializeObject<string>(Convert.ToString(resp.Result));
+                        outputMsg.Message = resp.Result;
                     }
                     else
                     {
-                        outputMsg.Message = JsonConvert.DeserializeObject<string>(Convert.ToString(resp.Errors));
+                        outputMsg.Message = string.Join(", ", resp.Errors);
                     }
                     return outputMsg;
                 }
@@ -192,7 +191,7 @@ namespace GatewayService.Services
 
                 if (resp.Successful)
                 {
-                    return JsonConvert.DeserializeObject<UserRegisterDTO>(Convert.ToString(resp.Result));
+                    return resp.Result;
                 }
                 else
                 {

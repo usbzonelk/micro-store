@@ -2,11 +2,8 @@ using System.ComponentModel.DataAnnotations;
 namespace GatewayService.Models.DTO
 
 {
-    public class UserRegisterDTO
+    public class UserRegisterInputDTO
     {
-        [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
-        public string Email { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string PhoneNumber { get; set; }

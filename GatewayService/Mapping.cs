@@ -7,10 +7,7 @@ namespace GatewayService
     {
         public Mappings()
         {
-            /* CreateMap<object, AdminDTO>()
-                        .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.GetType().GetProperty("isActive").GetValue(src)))
-                        .ForMember(dest => dest.Email, opt => opt.MapFrom(src => (string)src.GetType().GetProperty("email").GetValue(src)))
-                        .ReverseMap(); */
+            CreateMap<UserRegisterInputDTO, UserRegisterDTO>().ReverseMap();
         }
     }
 

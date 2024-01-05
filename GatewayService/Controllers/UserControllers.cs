@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 namespace GatewayService.PublicControllers.v1
 {
@@ -20,54 +21,63 @@ namespace GatewayService.PublicControllers.v1
         private readonly ILogger<AuthController> _logger;
         protected APIOutDTO _response;
         private IUserService _userService;
-        private IAdminService _adminService;
-        public UserManageController(ILogger<AuthController> logger, IUserService userService, IAdminService adminService)
+        private IMapper _mapper;
+        public UserManageController(IMapper mapper, ILogger<AuthController> logger, IUserService userService)
         {
             _logger = logger;
             _response = new();
             _userService = userService;
-            _adminService = adminService;
+            _mapper = mapper;
         }
 
-        [HttpPost("user", Name = "LogInUser2")]
+        [HttpPost("updatePassword", Name = "UpdateUserPassword")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<APIOutDTO>> LogInUser2(UserLoginDTO userInfo)
+        public async Task<ActionResult<APIOutDTO>> UpdateUserPassword(UserUpdatePswInputDTO updatePassInfoInput)
         {
-            UserLoginOutput userLoginOutput = new();
             try
             {
-                if ((userInfo.Email is null) || (userInfo.Password is null))
+                string userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail is null)
                 {
-                    _response.Status = HttpStatusCode.NotFound;
-                    _response.Result = userLoginOutput;
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
                     _response.Successful = false;
 
-                    return NotFound(_response);
+                    return BadRequest(_response);
                 }
-                var userFound = await _userService.Authorize(userInfo);
 
-                if (userFound == null || userFound == false)
+                UserUpdatePswDTO updatePassInfo = new UserUpdatePswDTO()
                 {
-                    _response.Status = HttpStatusCode.NotFound;
-                    _response.Result = userLoginOutput;
+                    Password = updatePassInfoInput.Password,
+                    OldPassword = updatePassInfoInput.OldPassword,
+                    Email = userEmail
+                };
+
+                if (updatePassInfo is null || (updatePassInfo.Email is null) || (updatePassInfo.Password is null))
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
                     _response.Successful = false;
 
-                    return NotFound(_response);
+                    return BadRequest(_response);
+                }
+                var updateStatus = await _userService.UpdateUserPassword(updatePassInfo);
+
+                if (updateStatus == null || updateStatus.IsSuccessful == false)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = updateStatus.Message;
+                    _response.Successful = false;
+
+                    return BadRequest(_response);
                 }
                 else
                 {
-                    IEnumerable<Claim> jwtData = new List<Claim> {
-                        new Claim(ClaimTypes.Email,userInfo.Email ),
-                        new Claim(ClaimTypes.Role, "User"),
-                    };
-                    DateTime expTime = DateTime.Now.AddDays(15);
-                    string jwtToken = JWTManager.GenerateJwt(jwtData, expTime);
-
                     _response.Status = HttpStatusCode.OK;
-                    _response.Result = jwtToken;
+                    _response.Result = updateStatus.Message;
                     return Ok(_response);
                 }
             }
@@ -80,45 +90,50 @@ namespace GatewayService.PublicControllers.v1
             }
             return _response;
         }
-        [HttpPost("admin", Name = "LogInAdmin2")]
+        [HttpPost("addDetails", Name = "AddDetails")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<APIOutDTO>> LogInAdmin2(AdminSignupDTO adminInfo)
+        public async Task<ActionResult<APIOutDTO>> AddDetails(UserRegisterInputDTO userInfoInput)
         {
-            UserLoginOutput userLoginOutput = new();
             try
             {
-                if ((adminInfo.Email is null) || (adminInfo.Password is null))
+                string userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail is null)
                 {
-                    _response.Status = HttpStatusCode.NotFound;
-                    _response.Result = userLoginOutput;
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
+                    _response.Successful = false;
+
+                    return BadRequest(_response);
+                }
+
+                UserRegisterDTO userInfo = _mapper.Map<UserRegisterDTO>(userInfoInput);
+                userInfo.Email = userEmail;
+
+                if ((userInfo.Email is null) || (userInfo is null))
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
                     _response.Successful = false;
 
                     return NotFound(_response);
                 }
-                var adminFound = await _adminService.Authorize(adminInfo);
+                var userUpdateStatus = await _userService.AddUserDetails(userInfo);
 
-                if (adminFound is null || adminFound is not "Admin authenticated successfully!")
+                if (userUpdateStatus is null || userUpdateStatus.Email is null)
                 {
-                    _response.Status = HttpStatusCode.NotFound;
-                    _response.Result = userLoginOutput;
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
                     _response.Successful = false;
 
-                    return NotFound(_response);
+                    return BadRequest(_response);
                 }
                 else
                 {
-                    IEnumerable<Claim> jwtData = new List<Claim> {
-                        new Claim(ClaimTypes.Email,adminInfo.Email ),
-                        new Claim(ClaimTypes.Role, "Admin"),
-                    };
-                    DateTime expTime = DateTime.Now.AddDays(15);
-                    string jwtToken = JWTManager.GenerateJwt(jwtData, expTime);
-
                     _response.Status = HttpStatusCode.OK;
-                    _response.Result = jwtToken;
+                    _response.Result = userUpdateStatus;
                     return Ok(_response);
                 }
             }
