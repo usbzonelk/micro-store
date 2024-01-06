@@ -61,26 +61,26 @@ namespace GatewayService.Services
                 throw e;
             }
         }
-        public async Task<GeneralCustomAPIOutput<bool>> RemoveFullCart(string email)
+        public async Task<GeneralCustomAPIOutput<string>> RemoveFullCart(string email)
         {
-            var output = new GeneralCustomAPIOutput<bool> { IsSuccessful = false, Output = false };
+            var output = new GeneralCustomAPIOutput<string> { IsSuccessful = false, Output = "" };
 
             try
             {
                 var client = _httpClientFactory.CreateClient("Cart");
                 var response = await client.DeleteAsync($"/api/v1/carts/removefullcart/{email}");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse<bool>>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<string>>(apiContet);
                 if (resp.Successful)
                 {
-                    output.Output = true;
+                    output.Output = resp.Result;
                     output.IsSuccessful = true;
                 }
                 return output;
             }
             catch (Exception e)
             {
-                return output;
+                throw e;
             }
         }
     }

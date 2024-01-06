@@ -6,7 +6,7 @@ namespace GatewayService.Services
     {
         Task<GeneralCustomAPIOutput<IEnumerable<CartOutputDTO>>> GetCarts(string email);
         Task<GeneralCustomAPIOutput<CartOutputDTO>> AddToCart(string email, CartInputParentDTO productToAdd);
-        Task<GeneralCustomAPIOutput<bool>> RemoveFullCart(string email);
+        Task<GeneralCustomAPIOutput<string>> RemoveFullCart(string email);
 
     }
 }

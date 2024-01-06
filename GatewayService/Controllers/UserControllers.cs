@@ -273,7 +273,61 @@ namespace GatewayService.PublicControllers.v1
             }
             return _response;
         }
+        [HttpDelete("deleteCart", Name = "DeleteCart")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIOutDTO>> DeleteCart()
+        {
+            try
+            {
+                string userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail is null)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
+                    _response.Successful = false;
 
+                    return BadRequest(_response);
+                }
+
+
+                var cartDeleteStatus = await _cartService.RemoveFullCart(userEmail);
+
+                if (cartDeleteStatus is null)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
+                    _response.Successful = false;
+
+                    return BadRequest(_response);
+                }
+                else
+                {
+                    if (cartDeleteStatus.IsSuccessful)
+                    {
+                        _response.Status = HttpStatusCode.OK;
+                        _response.Result = cartDeleteStatus;
+                        return Ok(_response);
+                    }
+                    else
+                    {
+                        _response.Status = HttpStatusCode.BadRequest;
+                        _response.Result = null;
+                        _response.Successful = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
     }
 
 }
