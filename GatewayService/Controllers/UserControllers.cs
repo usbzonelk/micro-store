@@ -329,5 +329,75 @@ namespace GatewayService.PublicControllers.v1
             return _response;
         }
     }
+    /* --------------------------------------*/
 
+
+    [Route("api/v1/user/orders")]
+    [ApiController]
+    [Authorize]
+    public class OrderManageController : ControllerBase
+    {
+        private readonly ILogger<AuthController> _logger;
+        protected APIOutDTO _response;
+        private IOrderService _orderService;
+        private IMapper _mapper;
+        public OrderManageController(IMapper mapper, ILogger<AuthController> logger, IOrderService orderService)
+        {
+            _logger = logger;
+            _response = new();
+            _orderService = orderService;
+            _mapper = mapper;
+        }
+
+        [HttpGet("viewOrders", Name = "ViewOrders")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIOutDTO>> ViewOrders()
+        {
+            try
+            {
+                string userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail is null)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = "Invalid email!";
+                    _response.Successful = false;
+
+                    return BadRequest(_response);
+                }
+
+                var ordersFound = await _orderService.GetAllOrders(userEmail);
+                if (ordersFound == null)
+                {
+                    _response.Status = HttpStatusCode.OK;
+                    _response.Result = null;
+                    return Ok(_response);
+                }
+                else if (ordersFound.IsSuccessful == false)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = ordersFound;
+                    _response.Successful = false;
+
+                    return BadRequest(_response);
+                }
+                else
+                {
+                    _response.Status = HttpStatusCode.OK;
+                    _response.Result = ordersFound.Output;
+                    return Ok(_response);
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+    }
 }

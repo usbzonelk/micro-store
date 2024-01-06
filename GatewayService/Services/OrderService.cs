@@ -22,11 +22,18 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Order");
                 var response = await client.GetAsync($"/getAllOrders/{email}");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<OrderOutputDTO>>>(apiContet);
-                if (resp.Successful)
+
+                var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<object>>>(apiContet);
+                if (resp is not null && resp.Successful)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<IEnumerable<OrderOutputDTO>>(Convert.ToString(resp.Result));
+                    var resp2 = JsonConvert.DeserializeObject<APIResponse<IEnumerable<OrderOutputDTO>>>(apiContet);
+
+                    var apiRes = resp2.Result;
                     output.Output = apiRes;
+                    output.IsSuccessful = true;
+                }
+                else if (resp is null)
+                {
                     output.IsSuccessful = true;
                 }
                 return output;
