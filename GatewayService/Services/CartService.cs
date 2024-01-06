@@ -14,19 +14,19 @@ namespace GatewayService.Services
         {
             _httpClientFactory = clientFactory;
         }
-        public async Task<GeneralCustomAPIOutput<IEnumerable<CartDTO>>> GetCarts(string email)
+        public async Task<GeneralCustomAPIOutput<IEnumerable<CartOutputDTO>>> GetCarts(string email)
         {
-            var output = new GeneralCustomAPIOutput<IEnumerable<CartDTO>> { IsSuccessful = false, Output = new List<CartDTO> { } };
+            var output = new GeneralCustomAPIOutput<IEnumerable<CartOutputDTO>> { IsSuccessful = false, Output = new List<CartOutputDTO> { } };
             try
             {
                 var client = _httpClientFactory.CreateClient("Cart");
                 var response = await client.GetAsync($"/api/v1/carts/{email}");
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<CartDTO>>>(apiContet);
+                Console.WriteLine("\n\n" + apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<IEnumerable<CartOutputDTO>>>(apiContet);
                 if (resp.Successful)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<IEnumerable<CartDTO>>(Convert.ToString(resp.Result));
-                    output.Output = apiRes;
+                    output.Output = resp.Result;
                     output.IsSuccessful = true;
                 }
                 return output;
@@ -36,9 +36,9 @@ namespace GatewayService.Services
                 return output;
             }
         }
-        public async Task<GeneralCustomAPIOutput<CartDTO>> AddToCart(string email, CartProductInputDTO productToAdd)
+        public async Task<GeneralCustomAPIOutput<CartOutputDTO>> AddToCart(string email, CartProductInputDTO productToAdd)
         {
-            var output = new GeneralCustomAPIOutput<CartDTO> { IsSuccessful = false, Output = new CartDTO { } };
+            var output = new GeneralCustomAPIOutput<CartOutputDTO> { IsSuccessful = false, Output = new CartOutputDTO { } };
 
             var jsonPost = JsonConvert.SerializeObject(productToAdd);
             var postContent = new StringContent(jsonPost, Encoding.UTF8, "application/json");
@@ -47,10 +47,10 @@ namespace GatewayService.Services
                 var client = _httpClientFactory.CreateClient("Cart");
                 var response = await client.PostAsync($"/api/v1/carts/addtocart/{email}", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
-                var resp = JsonConvert.DeserializeObject<APIResponse<CartDTO>>(apiContet);
+                var resp = JsonConvert.DeserializeObject<APIResponse<CartOutputDTO>>(apiContet);
                 if (resp.Successful)
                 {
-                    var apiRes = JsonConvert.DeserializeObject<CartDTO>(Convert.ToString(resp.Result));
+                    var apiRes = resp.Result;
                     output.Output = apiRes;
                     output.IsSuccessful = true;
                 }

@@ -4,7 +4,7 @@ namespace GatewayService.Models.DTO
 {
     public class CartInputDTO
     {
-        public List<ProductInputDTO> CartProducts { get; set; }
+        public List<CartProductInputDTO> CartProducts { get; set; }
 
     }
 }
