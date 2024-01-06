@@ -210,64 +210,70 @@ namespace GatewayService.PublicControllers.v1
             }
             return _response;
         }
-        /*
-                [HttpPost("addToCart", Name = "AddToCart")]
-                [ProducesResponseType(StatusCodes.Status403Forbidden)]
-                [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-                [ProducesResponseType(StatusCodes.Status200OK)]
-                [ProducesResponseType(StatusCodes.Status404NotFound)]
-                public async Task<ActionResult<APIOutDTO>> AddToCart(CartInputDTO userInfoInput)
+
+        [HttpPost("addToCart", Name = "AddToCart")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIOutDTO>> AddToCart([FromBody] CartInputParentDTO productInfoInput)
+        {
+            try
+            {
+                string userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (userEmail is null)
                 {
-                    try
-                    {
-                        string userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                        if (userEmail is null)
-                        {
-                            _response.Status = HttpStatusCode.BadRequest;
-                            _response.Result = null;
-                            _response.Successful = false;
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
+                    _response.Successful = false;
 
-                            return BadRequest(_response);
-                        }
-
-                        UserRegisterDTO userInfo = _mapper.Map<UserRegisterDTO>(userInfoInput);
-                        userInfo.Email = userEmail;
-
-                        if ((userInfo.Email is null) || (userInfo is null))
-                        {
-                            _response.Status = HttpStatusCode.BadRequest;
-                            _response.Result = null;
-                            _response.Successful = false;
-
-                            return NotFound(_response);
-                        }
-                        var userUpdateStatus = await _userService.AddUserDetails(userInfo);
-
-                        if (userUpdateStatus is null || userUpdateStatus.Email is null)
-                        {
-                            _response.Status = HttpStatusCode.BadRequest;
-                            _response.Result = null;
-                            _response.Successful = false;
-
-                            return BadRequest(_response);
-                        }
-                        else
-                        {
-                            _response.Status = HttpStatusCode.OK;
-                            _response.Result = userUpdateStatus;
-                            return Ok(_response);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _response.Successful = false;
-                        _response.Errors
-                             = new List<string>() { ex.ToString() };
-                        _response.Status = HttpStatusCode.InternalServerError;
-                    }
-                    return _response;
+                    return BadRequest(_response);
                 }
-                */
+
+                if (productInfoInput is null)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
+                    _response.Successful = false;
+
+                    return NotFound(_response);
+                }
+                var cartUpdateStatus = await _cartService.AddToCart(userEmail, productInfoInput);
+
+                if (cartUpdateStatus is null)
+                {
+                    _response.Status = HttpStatusCode.BadRequest;
+                    _response.Result = null;
+                    _response.Successful = false;
+
+                    return BadRequest(_response);
+                }
+                else
+                {
+                    if (cartUpdateStatus.IsSuccessful)
+                    {
+                        _response.Status = HttpStatusCode.OK;
+                        _response.Result = cartUpdateStatus;
+                        return Ok(_response);
+                    }
+                    else
+                    {
+                        _response.Status = HttpStatusCode.BadRequest;
+                        _response.Result = null;
+                        _response.Successful = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.Successful = false;
+                _response.Errors
+                     = new List<string>() { ex.ToString() };
+                _response.Status = HttpStatusCode.InternalServerError;
+            }
+            return _response;
+        }
+
     }
 
 }

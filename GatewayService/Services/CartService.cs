@@ -36,7 +36,7 @@ namespace GatewayService.Services
                 return output;
             }
         }
-        public async Task<GeneralCustomAPIOutput<CartOutputDTO>> AddToCart(string email, CartProductInputDTO productToAdd)
+        public async Task<GeneralCustomAPIOutput<CartOutputDTO>> AddToCart(string email, CartInputParentDTO productToAdd)
         {
             var output = new GeneralCustomAPIOutput<CartOutputDTO> { IsSuccessful = false, Output = new CartOutputDTO { } };
 
@@ -58,7 +58,7 @@ namespace GatewayService.Services
             }
             catch (Exception e)
             {
-                return output;
+                throw e;
             }
         }
         public async Task<GeneralCustomAPIOutput<bool>> RemoveFullCart(string email)
