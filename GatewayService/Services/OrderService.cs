@@ -44,22 +44,23 @@ namespace GatewayService.Services
             }
         }
 
-        public async Task<GeneralCustomAPIOutput<bool>> CreateOrder(string email)
+        public async Task<GeneralCustomAPIOutput<string>> CreateOrder(string email)
         {
-            var output = new GeneralCustomAPIOutput<bool> { IsSuccessful = false, Output = false };
+            var output = new GeneralCustomAPIOutput<string> { IsSuccessful = false, Output = null };
             var jsonPost = JsonConvert.SerializeObject(new object { });
             var postContent = new StringContent(jsonPost, Encoding.UTF8, "application/json");
 
             try
             {
-                var client = _httpClientFactory.CreateClient("Product");
+                var client = _httpClientFactory.CreateClient("Order");
                 var response = await client.PostAsync($"/createorder/{email}", postContent);
                 var apiContet = await response.Content.ReadAsStringAsync();
                 var resp = JsonConvert.DeserializeObject<APIResponse<string>>(apiContet);
                 if (resp.Successful)
                 {
-                    output.Output = true;
-                    output.IsSuccessful = (resp.Result is "Cart is empty") ? false : true;
+                    output.Output = (resp.Result is "Cart is empty") ? resp.Result : "Successfully checked out!";
+
+                    output.IsSuccessful = true;
 
                 }
                 return output;
