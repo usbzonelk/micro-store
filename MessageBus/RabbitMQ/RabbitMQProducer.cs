@@ -11,18 +11,26 @@ namespace MessageBus.RabittMQ
             var factory = new ConnectionFactory
             {
                 HostName = "localhost",
+                Port = 5672,
+                UserName = "guest",
+                Password = "guest"
             };
-
             var connection = factory.CreateConnection();
 
             using
             var channel = connection.CreateModel();
-            channel.QueueDeclare("email", exclusive: false);
+
+            channel.ExchangeDeclare("EmailExchange", ExchangeType.Direct);
+            channel.QueueDeclare(queue: "email", exclusive: false);
+            channel.QueueBind("email", "EmailExchange", routingKey: "key-route", arguments: null);
 
             var json = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(json);
 
-            channel.BasicPublish(exchange: "", routingKey: "newEmail", body: body);
+            channel.BasicPublish(exchange: "EmailExchange", routingKey: "key-route", basicProperties: null, body: body);
+
+            channel.Close();
+            connection.Close();
         }
     }
 }
