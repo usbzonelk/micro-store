@@ -1,7 +1,7 @@
-namespace MessageBus.RabitMQ
+namespace MessageBus.RabittMQ
 {
-    interface IRabitMQProducer
+    public interface IRabitMQProducer
     {
-        void SendProductMessage<T>(T message);
+        void SendEmail<T>(T message);
     }
 }

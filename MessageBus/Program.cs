@@ -1,6 +1,8 @@
+using MessageBus.RabittMQ;
+
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Services.AddScoped<IRabitMQProducer, RabitMQProducer>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

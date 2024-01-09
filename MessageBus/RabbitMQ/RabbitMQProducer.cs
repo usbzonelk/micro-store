@@ -2,14 +2,17 @@ using RabbitMQ.Client;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace MessageBus.RabitMQ
+namespace MessageBus.RabittMQ
 {
-    public class RabitMQProducer: IRabitMQProducer {
-        public void SendProductMessage < T > (T message) {
-            var factory = new ConnectionFactory {
-            HostName = "localhost",
+    public class RabitMQProducer : IRabitMQProducer
+    {
+        public void SendEmail<T>(T message)
+        {
+            var factory = new ConnectionFactory
+            {
+                HostName = "localhost",
             };
-            
+
             var connection = factory.CreateConnection();
 
             using
